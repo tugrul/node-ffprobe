@@ -1,0 +1,17 @@
+{
+  "name": "@tugrul/ffprobe",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Tuğrul Topuz <tugrultopuz@gmail.com>",
+  "license": "MIT",
+  "engines": { "node": ">= 14.0.0" },
+  "scripts": {
+    "install": "cmake-js compile"
+  },
+  "dependencies": {
+    "node-addon-api": "^4.2.0"
+  },
+  "devDependencies": {
+    "cmake-js": "^6.3.0"
+  }
+}
