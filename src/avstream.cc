@@ -298,9 +298,6 @@ Napi::Value AvStream::GetCodecProfileName() {
     return Napi::String::New(Env(), profileName);
 }
 
-
-
-
 Napi::Value AvStream::GetAudioChannelLayout() {
     char buf[256];
 
@@ -492,7 +489,6 @@ void AvStream::ExportCommonInfo(Napi::Object that) {
 
         Napi::PropertyDescriptor::Value("level",
             codecpar->level == FF_LEVEL_UNKNOWN ? Env().Null() : Napi::Number::New(Env(), (int)codecpar->level), napi_enumerable),
-        
 
         Napi::PropertyDescriptor::Value("codecName",
             Napi::String::New(Env(), avcodec_get_name(codecpar->codec_id)), napi_enumerable),

@@ -1,6 +1,6 @@
 
 #include <napi.h>
-
+#include <thread>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -56,7 +56,9 @@ const Napi::Object GetVersionsObject(const Napi::Env& env) {
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
-    av_log_set_level(AV_LOG_DEBUG);
+    // av_log_set_level(AV_LOG_DEBUG);
+
+    av_log_set_callback(&AvLogReader::LogCallback);
 
     exports.Set(Napi::String::New(env, "getFileInfo"), Napi::Function::New(env, GetFileInfo));
     exports.Set(Napi::String::New(env, "versions"), GetVersionsObject(env));
@@ -74,8 +76,3 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
 NODE_API_MODULE(addon, Init)
 
 };
-
-
-
-
-
