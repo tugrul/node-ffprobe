@@ -33,6 +33,7 @@ private:
     std::condition_variable cvPromise;
     bool completed;
     bool started;
+    uint32_t readTimeoutMs;
     Napi::Value Next(const Napi::CallbackInfo& info);
     Napi::Value Return(const Napi::CallbackInfo& info);
     Napi::Value Throw(const Napi::CallbackInfo& info);
@@ -43,7 +44,7 @@ private:
 class AvLogReaderWorker : public Napi::AsyncWorker {
 public:
     AvLogReaderWorker(const Napi::Env& env, Napi::Promise::Deferred&& def, std::queue<std::string>& msg, 
-        std::mutex& mutex, std::condition_variable& con, bool& comp);
+        std::mutex& mutex, std::condition_variable& con, bool& comp, const uint32_t& timeout);
     void Execute() override;
     void OnOK() override;
     void OnError(const Napi::Error& error) override;
@@ -55,6 +56,7 @@ private:
     std::condition_variable& cv;
     std::string str;
     bool& completed;
+    const uint32_t& readTimeoutMs; 
 };
  
 

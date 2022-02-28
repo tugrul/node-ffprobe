@@ -20,7 +20,12 @@ InstanceSet AvLogReader::instances;
 
 
 AvLogReader::AvLogReader(const Napi::CallbackInfo& info) : 
-Napi::ObjectWrap<AvLogReader>(info), completed(false), started(false), promiseMutex(), cvPromise(), logLines() {
+Napi::ObjectWrap<AvLogReader>(info), completed(false), started(false), promiseMutex(), cvPromise(), logLines(), readTimeoutMs(5000) {
+
+
+    if (info[0].IsNumber()) {
+        readTimeoutMs = info[0].As<Napi::Number>();
+    }
 
     std::lock_guard<std::mutex> guard(logMutex);
     instances.insert(std::ref(*this));
@@ -40,7 +45,7 @@ Napi::Value AvLogReader::Next(const Napi::CallbackInfo& info) {
         return deferred.Promise();
     }
 
-    AvLogReaderWorker* worker = new AvLogReaderWorker(Env(), std::move(deferred), logLines, promiseMutex, cvPromise, completed);
+    AvLogReaderWorker* worker = new AvLogReaderWorker(Env(), std::move(deferred), logLines, promiseMutex, cvPromise, completed, readTimeoutMs);
     worker->Queue();
 
     return deferred.Promise();
@@ -61,7 +66,7 @@ Napi::Value AvLogReader::Return(const Napi::CallbackInfo& info) {
 
     completed = true;
 
-    AvLogReaderWorker* worker = new AvLogReaderWorker(Env(), std::move(deferred), logLines, promiseMutex, cvPromise, completed);
+    AvLogReaderWorker* worker = new AvLogReaderWorker(Env(), std::move(deferred), logLines, promiseMutex, cvPromise, completed, readTimeoutMs);
     worker->Queue();
 
     return deferred.Promise();
@@ -87,7 +92,7 @@ Napi::Value AvLogReader::Throw(const Napi::CallbackInfo& info) {
 
     completed = true;
 
-    AvLogReaderWorker* worker = new AvLogReaderWorker(Env(), std::move(deferred), logLines, promiseMutex, cvPromise, completed);
+    AvLogReaderWorker* worker = new AvLogReaderWorker(Env(), std::move(deferred), logLines, promiseMutex, cvPromise, completed, readTimeoutMs);
     worker->Queue();
 
     return deferred.Promise();
@@ -136,12 +141,12 @@ Napi::Function AvLogReader::Define(Napi::Env env) {
 }
 
 AvLogReaderWorker::AvLogReaderWorker(const Napi::Env& env, Napi::Promise::Deferred&& def, 
-    std::queue<std::string>& msg, std::mutex& mutex, std::condition_variable& con, bool& comp): 
-        Napi::AsyncWorker(env), deferred(std::move(def)), logLines(msg), mut(mutex), cv(con), str(), completed(comp) {}
+    std::queue<std::string>& msg, std::mutex& mutex, std::condition_variable& con, bool& comp, const uint32_t& timeout): 
+        Napi::AsyncWorker(env), deferred(std::move(def)), logLines(msg), mut(mutex), cv(con), str(), completed(comp), readTimeoutMs(timeout) {}
 
 void AvLogReaderWorker::Execute() {
     std::unique_lock<std::mutex> lk(mut);
-    completed = !cv.wait_for(lk, std::chrono::milliseconds(5000), [&] { return !logLines.empty(); });
+    completed = !cv.wait_for(lk, std::chrono::milliseconds(readTimeoutMs), [&] { return !logLines.empty(); });
 
     if (!completed) {
         str = logLines.front();
