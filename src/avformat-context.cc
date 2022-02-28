@@ -1,13 +1,11 @@
 
 #include "avformat-context.h"
 #include "media-info-worker.h"
-
 #include "instance-data.h"
 #include "util.h"
 #include "avduration.h"
 #include "avchapter.h"
 #include "avprogram.h"
-#include <iostream>
 
 
 namespace node_ffprobe {
@@ -70,7 +68,7 @@ void AvFormatContext::ExportCommonInfo(Napi::Object that) {
             Napi::Number::New(Env(), context->flags), napi_enumerable), 
             
         Napi::PropertyDescriptor::Value("metadata",
-            getMetadata(Env(), context->metadata), napi_enumerable)
+            GetMetadata(Env(), context->metadata), napi_enumerable)
 
     });
 
@@ -137,7 +135,7 @@ void AvFormatContext::ExportChapterInfo(Napi::Object that) {
             Napi::Number::New(Env(), chapter->id),
             Napi::Number::New(Env(), chapter->start * timeBase),
             Napi::Number::New(Env(), chapter->end * timeBase),
-            getMetadata(Env(), chapter->metadata)
+            GetMetadata(Env(), chapter->metadata)
         });
     }
 
@@ -166,7 +164,7 @@ void AvFormatContext::ExportProgramInfo(Napi::Object that, Napi::Array streams) 
             Napi::Number::New(Env(), program->flags),
             Napi::Number::New(Env(), program->discard),
             progStreams,
-            getMetadata(Env(), program->metadata),
+            GetMetadata(Env(), program->metadata),
             Napi::Number::New(Env(), program->program_num),
             Napi::Number::New(Env(), program->pmt_pid),
             Napi::Number::New(Env(), program->pcr_pid),
@@ -184,10 +182,6 @@ Napi::Function AvFormatContext::Define(Napi::Env env, AVFormatContext* data) {
 
     constructor = Napi::Persistent(func);
     constructor.SuppressDestruct();
-
-    // InstanceData* instanceData = new InstanceData();
-    // env.SetInstanceData<InstanceData>(instanceData);
-    // instanceData->avFormatContext = Napi::Persistent(avFunc);
 
     return func;
 

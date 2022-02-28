@@ -3,8 +3,8 @@
 #include "avformat-context.h"
 
 extern "C" {
-#include <libavutil/pixdesc.h>
-#include <libavutil/channel_layout.h>
+    #include <libavutil/pixdesc.h>
+    #include <libavutil/channel_layout.h>
 }
 
 namespace node_ffprobe {
@@ -497,7 +497,7 @@ void AvStream::ExportCommonInfo(Napi::Object that) {
             GetDisposition(), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("metadata",
-            getMetadata(Env(), context->metadata), napi_enumerable)
+            GetMetadata(Env(), context->metadata), napi_enumerable)
     });
 }
 

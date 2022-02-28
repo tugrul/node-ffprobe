@@ -1,11 +1,10 @@
 
 #include "avlog-reader.h"
 #include "util.h"
-#include <iostream>
 #include <chrono>
 
 extern "C" {
-#include <libavutil/log.h>
+    #include <libavutil/log.h>
 }
 
 namespace node_ffprobe {
@@ -146,6 +145,8 @@ AvLogReaderWorker::AvLogReaderWorker(const Napi::Env& env, Napi::Promise::Deferr
 
 void AvLogReaderWorker::Execute() {
     std::unique_lock<std::mutex> lk(mut);
+
+    // observe AvLogReader::LogCallback method until timeout delay
     completed = !cv.wait_for(lk, std::chrono::milliseconds(readTimeoutMs), [&] { return !logLines.empty(); });
 
     if (!completed) {

@@ -18,7 +18,7 @@ union FourCCIdentifier {
     char name[4];
 };
 
-const Napi::Object getMetadata(const Napi::Env& env, const AVDictionary* dictionary);
+const Napi::Object GetMetadata(const Napi::Env& env, const AVDictionary* dictionary);
 const Napi::Object GeneratorValue(Napi::Env env, Napi::Value value, bool done);
 
 };

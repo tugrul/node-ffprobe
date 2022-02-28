@@ -17,14 +17,14 @@ void MediaInfoWorker::Execute() {
     avFormatContext = avformat_alloc_context();
 
     if (!avFormatContext) {
-        Napi::AsyncWorker::SetError("aformat context memory could not allocated");
+        Napi::AsyncWorker::SetError("aformat context memory could not be allocated");
         return;
     }
 
     int openStatus = avformat_open_input(&avFormatContext, fileName.c_str(), NULL, NULL);
 
     if (openStatus < 0) {
-        Napi::AsyncWorker::SetError("file could not opened");
+        Napi::AsyncWorker::SetError("file could not be opened");
         return;
     }
 

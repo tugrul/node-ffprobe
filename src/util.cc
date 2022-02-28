@@ -3,7 +3,7 @@
 
 namespace node_ffprobe {
 
-const Napi::Object getMetadata(const Napi::Env& env, const AVDictionary* dictionary) {
+const Napi::Object GetMetadata(const Napi::Env& env, const AVDictionary* dictionary) {
 
     std::map<std::string, std::vector<std::string>> items;
 

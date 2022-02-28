@@ -9,8 +9,8 @@
 #include "util.h"
 
 extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avformat.h>
 }
 
 namespace node_ffprobe {

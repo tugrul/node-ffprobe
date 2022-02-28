@@ -5,8 +5,6 @@
 
 #include <napi.h>
 
-
-
 namespace node_ffprobe {
 
 class AvDuration: public Napi::ObjectWrap<AvDuration> {

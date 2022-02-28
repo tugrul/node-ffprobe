@@ -3,10 +3,10 @@
 #include <thread>
 
 extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/avutil.h>
-#include <libavutil/imgutils.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avformat.h>
+    #include <libavutil/avutil.h>
+    #include <libavutil/imgutils.h>
 };
 
 #include "instance-data.h"
@@ -55,8 +55,6 @@ const Napi::Object GetVersionsObject(const Napi::Env& env) {
 
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
-
-    // av_log_set_level(AV_LOG_DEBUG);
 
     av_log_set_callback(&AvLogReader::LogCallback);
 
