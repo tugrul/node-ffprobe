@@ -4,7 +4,7 @@
   "main": "index.js",
   "author": "Tuğrul Topuz <tugrultopuz@gmail.com>",
   "license": "MIT",
-  "engines": { "node": ">= 14.0.0" },
+  "types": "./index.d.ts",
   "scripts": {
     "install": "cmake-js compile"
   },
@@ -12,6 +12,7 @@
     "node-addon-api": "^4.2.0"
   },
   "devDependencies": {
-    "cmake-js": "^6.3.0"
+    "cmake-js": "^6.3.0",
+    "jest": "^27.5.1"
   }
 }
