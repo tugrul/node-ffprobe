@@ -117,7 +117,7 @@ void AvLogReader::LogCallback(void* ptr, int level, const char* fmt, va_list vl)
     for (AvLogReader& instance: instances) {
         std::lock_guard<std::mutex> guard(instance.promiseMutex);
 
-        instance.logLines.push(line);
+        instance.logLines.push({level, line});
         instance.cvPromise.notify_one();
     }
 
@@ -140,7 +140,7 @@ Napi::Function AvLogReader::Define(Napi::Env env) {
 }
 
 AvLogReaderWorker::AvLogReaderWorker(const Napi::Env& env, Napi::Promise::Deferred&& def, 
-    std::queue<std::string>& msg, std::mutex& mutex, std::condition_variable& con, bool& comp, const uint32_t& timeout): 
+    std::queue<std::tuple<int, std::string>>& msg, std::mutex& mutex, std::condition_variable& con, bool& comp, const uint32_t& timeout): 
         Napi::AsyncWorker(env), deferred(std::move(def)), logLines(msg), mut(mutex), cv(con), str(), completed(comp), readTimeoutMs(timeout) {}
 
 void AvLogReaderWorker::Execute() {
@@ -150,7 +150,7 @@ void AvLogReaderWorker::Execute() {
     completed = !cv.wait_for(lk, std::chrono::milliseconds(readTimeoutMs), [&] { return !logLines.empty(); });
 
     if (!completed) {
-        str = logLines.front();
+        std::tie(level, str) = logLines.front();
         logLines.pop();
     }
 }
@@ -161,7 +161,10 @@ void AvLogReaderWorker::OnOK() {
     if (completed) {
         deferred.Resolve(GeneratorValue(Env(), Env().Undefined(), true));
     } else {
-        deferred.Resolve(GeneratorValue(Env(), Napi::String::New(Env(), str), false));
+        Napi::Array arr = Napi::Array::New(Env(), 2);
+        arr["0"] = Napi::Number::New(Env(), level);
+        arr["1"] = Napi::String::New(Env(), str);
+        deferred.Resolve(GeneratorValue(Env(), arr, false));
     }
 
     

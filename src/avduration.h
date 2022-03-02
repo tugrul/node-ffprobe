@@ -13,7 +13,6 @@ public:
     static Napi::Function Define(Napi::Env env);
     static Napi::FunctionReference constructor;
 private:
-    void ExportParts(Napi::Object that);
     Napi::Value GetDuration(const Napi::CallbackInfo& info);
     bool SetDuration(const Napi::CallbackInfo& info);
     Napi::Value ToString(const Napi::CallbackInfo& info);

@@ -7,6 +7,7 @@
 #include <functional>
 #include <set>
 #include <queue>
+#include <tuple>
 
 #include <napi.h>
 
@@ -28,7 +29,7 @@ private:
     static std::mutex logMutex;
     static InstanceSet instances;
 
-    std::queue<std::string> logLines;
+    std::queue<std::tuple<int, std::string>> logLines;
     std::mutex promiseMutex;
     std::condition_variable cvPromise;
     bool completed;
@@ -43,7 +44,7 @@ private:
 
 class AvLogReaderWorker : public Napi::AsyncWorker {
 public:
-    AvLogReaderWorker(const Napi::Env& env, Napi::Promise::Deferred&& def, std::queue<std::string>& msg, 
+    AvLogReaderWorker(const Napi::Env& env, Napi::Promise::Deferred&& def, std::queue<std::tuple<int, std::string>>& msg, 
         std::mutex& mutex, std::condition_variable& con, bool& comp, const uint32_t& timeout);
     void Execute() override;
     void OnOK() override;
@@ -51,10 +52,11 @@ public:
 
 private:
     Napi::Promise::Deferred deferred;
-    std::queue<std::string>& logLines;
+    std::queue<std::tuple<int, std::string>>& logLines;
     std::mutex& mut;
     std::condition_variable& cv;
     std::string str;
+    int level;
     bool& completed;
     const uint32_t& readTimeoutMs; 
 };

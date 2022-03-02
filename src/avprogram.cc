@@ -44,26 +44,41 @@ AvProgram::AvProgram(const Napi::CallbackInfo& info) :
     if (info[4].IsObject()) {
         that.DefineProperty(Napi::PropertyDescriptor::Value("metadata",
             info[4].As<Napi::Object>(), napi_enumerable));
+    } else if (!info[4].IsUndefined()) {
+        Napi::TypeError::New(Env(), "Metadata value should be object").ThrowAsJavaScriptException();
+        return;
     }
 
     if (info[5].IsNumber()) {
         that.DefineProperty(Napi::PropertyDescriptor::Value("programNum",
             info[5].As<Napi::Number>(), napi_enumerable));
+    } else if (!info[5].IsUndefined()) {
+        Napi::TypeError::New(Env(), "ProgramNum value should be numeric").ThrowAsJavaScriptException();
+        return;
     }
 
     if (info[6].IsNumber()) {
         that.DefineProperty(Napi::PropertyDescriptor::Value("pmtPid",
             info[6].As<Napi::Number>(), napi_enumerable));
+    } else if (!info[6].IsUndefined()) {
+        Napi::TypeError::New(Env(), "PmtPid value should be numeric").ThrowAsJavaScriptException();
+        return;
     }
 
     if (info[7].IsNumber()) {
         that.DefineProperty(Napi::PropertyDescriptor::Value("pcrPid",
             info[7].As<Napi::Number>(), napi_enumerable));
+    } else if (!info[7].IsUndefined()) {
+        Napi::TypeError::New(Env(), "PcrPid value should be numeric").ThrowAsJavaScriptException();
+        return;
     }
 
     if (info[8].IsNumber()) {
         that.DefineProperty(Napi::PropertyDescriptor::Value("pmtVersion",
             info[8].As<Napi::Number>(), napi_enumerable));
+    } else if (!info[8].IsUndefined()) {
+        Napi::TypeError::New(Env(), "PmtVersion value should be numeric").ThrowAsJavaScriptException();
+        return;
     }
 }
 

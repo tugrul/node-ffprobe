@@ -37,6 +37,8 @@ AvChapter::AvChapter(const Napi::CallbackInfo& info) :
     if (info[3].IsObject()) {
         that.DefineProperty(Napi::PropertyDescriptor::Value("metadata",
             info[3].As<Napi::Object>(), napi_enumerable));
+    } else if (!info[3].IsUndefined()) {
+        Napi::TypeError::New(Env(), "Metadata parameter type is invalid").ThrowAsJavaScriptException();
     }
 }
 

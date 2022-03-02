@@ -17,8 +17,22 @@ AvDuration::AvDuration(const Napi::CallbackInfo& info) :
         return;
     }
 
-    Napi::Object that = info.This().As<Napi::Object>();
-    ExportParts(that);
+    info.This().As<Napi::Object>().DefineProperties({
+
+        Napi::PropertyDescriptor::Value("hours",
+            Napi::Number::New(Env(), hours), napi_enumerable),
+        
+        Napi::PropertyDescriptor::Value("minutes",
+            Napi::Number::New(Env(), minutes), napi_enumerable),
+
+        Napi::PropertyDescriptor::Value("seconds",
+            Napi::Number::New(Env(), seconds), napi_enumerable),
+
+        Napi::PropertyDescriptor::Value("microseconds",
+            Napi::Number::New(Env(), microseconds), napi_enumerable)
+
+    });
+
 }
 
 Napi::Function AvDuration::Define(Napi::Env env) {
@@ -36,11 +50,6 @@ Napi::Function AvDuration::Define(Napi::Env env) {
 
 bool AvDuration::SetDuration(const Napi::CallbackInfo& info) {
 
-    if (!info[0].IsNumber()) {
-        Napi::TypeError::New(Env(), "Duration value type should be integer").ThrowAsJavaScriptException();
-        return false;
-    }
-
     int64_t param = info[0].As<Napi::Number>();
 
     duration = param + (param <= INT64_MAX - 5000 ? 5000 : 0);
@@ -57,26 +66,6 @@ bool AvDuration::SetDuration(const Napi::CallbackInfo& info) {
 
 Napi::Value AvDuration::GetDuration(const Napi::CallbackInfo& info) {
     return Napi::Number::New(Env(), duration);
-}
-
-void AvDuration::ExportParts(Napi::Object that) {
-
-    that.DefineProperties({
-
-        Napi::PropertyDescriptor::Value("hours",
-            Napi::Number::New(Env(), hours), napi_enumerable),
-        
-        Napi::PropertyDescriptor::Value("minutes",
-            Napi::Number::New(Env(), minutes), napi_enumerable),
-
-        Napi::PropertyDescriptor::Value("seconds",
-            Napi::Number::New(Env(), seconds), napi_enumerable),
-
-        Napi::PropertyDescriptor::Value("microseconds",
-            Napi::Number::New(Env(), microseconds), napi_enumerable)
-
-    });
-
 }
 
 Napi::Value AvDuration::ToString(const Napi::CallbackInfo& info) {
