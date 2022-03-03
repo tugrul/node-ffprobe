@@ -11,3 +11,14 @@ ffprobe.getFileInfo('sample.mp4').then(result => {
 });
 
 ```
+
+
+## Build Options
+
+You can specify `PKG_CONFIG_PATH` env variable if you want to link library with custom build of ffmpeg
+
+```bash
+export PKG_CONFIG_PATH=/path/to/ffmpeg-build/lib/pkgconfig
+npm install
+```
+

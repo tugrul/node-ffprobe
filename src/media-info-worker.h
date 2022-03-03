@@ -16,7 +16,7 @@ namespace node_ffprobe {
 
 class MediaInfoWorker : public Napi::AsyncWorker {
 public:
-    MediaInfoWorker(const Napi::Env& env, const std::string& fileName);
+    MediaInfoWorker(const Napi::Env& env, const std::string& fileName, Napi::Promise::Deferred&& def);
     void Execute() override;
     void OnOK() override;
     void OnError(const Napi::Error& error) override;

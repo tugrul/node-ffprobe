@@ -7,10 +7,10 @@ namespace node_ffprobe {
 AVFormatContext* MediaInfoWorker::sharedContext = nullptr;
 std::mutex MediaInfoWorker::sharedContextMutex;
 
-MediaInfoWorker::MediaInfoWorker(const Napi::Env& env, const std::string& fileName): 
+MediaInfoWorker::MediaInfoWorker(const Napi::Env& env, const std::string& fileName, Napi::Promise::Deferred&& def): 
         Napi::AsyncWorker(env), 
         fileName(fileName), 
-        deferred(Napi::Promise::Deferred::New(env)) {}
+        deferred(std::move(def)) {}
 
 void MediaInfoWorker::Execute() {
 
@@ -24,7 +24,7 @@ void MediaInfoWorker::Execute() {
     int openStatus = avformat_open_input(&avFormatContext, fileName.c_str(), NULL, NULL);
 
     if (openStatus < 0) {
-        Napi::AsyncWorker::SetError("file could not be opened");
+        Napi::AsyncWorker::SetError("filePath could not be opened");
         return;
     }
 
@@ -53,9 +53,5 @@ void MediaInfoWorker::OnError(const Napi::Error& error) {
     deferred.Reject(error.Value());
 }
 
-
-Napi::Promise MediaInfoWorker::GetPromise() {
-    return deferred.Promise();
-}
 
 };

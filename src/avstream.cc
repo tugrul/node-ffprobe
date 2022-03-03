@@ -218,13 +218,15 @@ Napi::Value AvStream::GetVideoColorPrimaries() {
 
 Napi::Value AvStream::GetCodecTagName() {
 
+    char name[AV_FOURCC_MAX_STRING_SIZE];
+
     if (context->codecpar->codec_tag == 0) {
         return Env().Null();
     }
 
-    FourCCIdentifier codecTag = {.codecTag = context->codecpar->codec_tag};
+    av_fourcc_make_string(name, context->codecpar->codec_tag);
 
-    return Napi::String::New(Env(), codecTag.name, 4);
+    return Napi::String::New(Env(), name);
 }
 
 Napi::Value AvStream::GetVideoColorTransfer() {
@@ -468,7 +470,7 @@ void AvStream::ExportCommonInfo(Napi::Object that) {
 
     that.DefineProperties({
         Napi::PropertyDescriptor::Value("id",
-            flags & AVFMT_SHOW_IDS ? Napi::Number::New(Env(), context->id) : Env().Null(), napi_enumerable),
+            (flags & AVFMT_SHOW_IDS) ? Napi::Number::New(Env(), context->id) : Env().Null(), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("duration",
             context->duration == AV_NOPTS_VALUE ? Env().Null() : 
@@ -497,7 +499,9 @@ void AvStream::ExportCommonInfo(Napi::Object that) {
             GetDisposition(), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("metadata",
-            GetMetadata(Env(), context->metadata), napi_enumerable)
+            GetMetadata(Env(), context->metadata), napi_enumerable),
+
+        Napi::PropertyDescriptor::Value("flags", Napi::Number::New(Env(), flags), napi_enumerable)
     });
 }
 

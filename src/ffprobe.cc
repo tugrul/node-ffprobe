@@ -26,14 +26,20 @@ namespace node_ffprobe {
 Napi::Promise GetFileInfo(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
-    std::string fileName = info[0].As<Napi::String>();
+    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
 
-    MediaInfoWorker* worker = new MediaInfoWorker(env, fileName);
-    Napi::Promise promise = worker->GetPromise();
+    if (!info[0].IsString()) {
+        deferred.Reject(Napi::TypeError::New(env, Napi::String::New(env,"filePath parameter should be a string value")).Value());
+        return deferred.Promise();
+    }
+
+    std::string filePath = info[0].As<Napi::String>();
+
+    MediaInfoWorker* worker = new MediaInfoWorker(env, filePath, std::move(deferred));
 
     worker->Queue();
 
-    return promise;
+    return deferred.Promise();
 }
 
 const Napi::Object GetVersionsObject(const Napi::Env& env) {

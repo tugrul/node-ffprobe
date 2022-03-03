@@ -13,11 +13,6 @@ extern "C" {
 
 namespace node_ffprobe {
 
-union FourCCIdentifier {
-    uint32_t codecTag;
-    char name[4];
-};
-
 const Napi::Object GetMetadata(const Napi::Env& env, const AVDictionary* dictionary);
 const Napi::Object GeneratorValue(Napi::Env env, Napi::Value value, bool done);
 

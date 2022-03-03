@@ -42,7 +42,7 @@ export interface StreamBase {
     readonly metadata: Metadata;
 }
 export declare type AvRational = [number, number];
-export declare class StreamVideo implements StreamBase {
+export declare class AvStreamVideo implements StreamBase {
     private constructor();
     readonly id: number | null;
     readonly duration: AvDuration | null;
@@ -70,7 +70,7 @@ export declare class StreamVideo implements StreamBase {
     readonly tbr: number | null;
     readonly tbn: number | null;
 }
-export declare class StreamAudio implements StreamBase {
+export declare class AvStreamAudio implements StreamBase {
     private constructor();
     readonly id: number | null;
     readonly duration: AvDuration | null;
@@ -91,7 +91,7 @@ export declare class StreamAudio implements StreamBase {
     readonly delay: number;
     readonly padding: number;
 }
-export declare class StreamData implements StreamBase {
+export declare class AvStreamData implements StreamBase {
     private constructor();
     readonly id: number | null;
     readonly duration: AvDuration | null;
@@ -105,7 +105,7 @@ export declare class StreamData implements StreamBase {
     readonly metadata: Metadata;
     readonly tbn: AvRational | null;
 }
-export declare class StreamSubtitle implements StreamBase {
+export declare class AvStreamSubtitle implements StreamBase {
     private constructor();
     readonly id: number | null;
     readonly duration: AvDuration | null;
@@ -120,7 +120,7 @@ export declare class StreamSubtitle implements StreamBase {
     readonly width: number;
     readonly height: number;
 }
-export declare class StreamAttachment implements StreamBase {
+export declare class AvStreamAttachment implements StreamBase {
     private constructor();
     readonly id: number | null;
     readonly duration: AvDuration | null;
@@ -133,7 +133,7 @@ export declare class StreamAttachment implements StreamBase {
     readonly disposition: Disposition;
     readonly metadata: Metadata;
 }
-export declare type Stream = StreamVideo | StreamAudio | StreamData | StreamSubtitle | StreamAttachment;
+export declare type Stream = AvStreamVideo | AvStreamAudio | AvStreamData | AvStreamSubtitle | AvStreamAttachment;
 export declare class AvChapter {
     constructor(id: number, start: number, end: number, metadata?: Metadata);
     readonly id: number;
