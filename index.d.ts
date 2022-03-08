@@ -181,15 +181,6 @@ export declare enum LogLevel {
     Debug = 48,
     Trace = 56
 }
-export declare type LogMessage = [LogLevel, string];
-export declare class AvLogReader implements AsyncIterableIterator<LogMessage> {
-    constructor(timeout: number);
-    [Symbol.asyncIterator](): AsyncIterableIterator<LogMessage>;
-    next(): Promise<IteratorResult<LogMessage, any>>;
-    return(value?: any): Promise<IteratorResult<LogMessage, any>>;
-    throw(e?: any): Promise<IteratorResult<LogMessage, any>>;
-    push(level: LogLevel, message: string): boolean;
-}
+
 export declare const versions: Versions;
 export declare function getFileInfo(filePath: string): Promise<AvFormatContext>;
-export declare function getLogReader(timeout?: number): AsyncIterableIterator<LogMessage>;

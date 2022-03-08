@@ -20,38 +20,11 @@ extern "C" {
 #include "avformat-context.h"
 #include "avchapter.h"
 #include "avprogram.h"
-#include "avlog-reader.h"
 #include "avstream.h"
 
 
 namespace node_ffprobe {
 
-typedef std::set<std::reference_wrapper<AvLogReader>, std::less<AvLogReader>> LogReaderInstanceSet;
-
-std::mutex logMutex;
-static int printLogPrefix = 1;
-
-static LogReaderInstanceSet logReaders;
-
-// static std::vector<Napi::ObjectReference> objects;
-
-static void LogCallback(void* ptr, int level, const char* fmt, va_list vl) {
-
-    std::lock_guard<std::mutex> guard(logMutex);
-
-    if (logReaders.empty()) {
-        return;
-    }
-
-    char line[256];
-
-    av_log_format_line(ptr, level, fmt, vl, line, sizeof(line), &printLogPrefix);
-
-    for (AvLogReader& reader: logReaders) {
-        reader.Push(level, line);
-    }
-
-}
 
 
 Napi::Promise GetFileInfo(const Napi::CallbackInfo& info) {
@@ -71,19 +44,6 @@ Napi::Promise GetFileInfo(const Napi::CallbackInfo& info) {
     worker->Queue();
 
     return deferred.Promise();
-}
-
-Napi::Value GetLogReader(const Napi::CallbackInfo& info) {
-    
-    std::lock_guard<std::mutex> guard(logMutex);
-
-    Napi::Object result = AvLogReader::constructor.New({info[0]});
-
-    //objects.push_back(Napi::Persistent(result));
-
-    logReaders.insert(std::ref(*AvLogReader::Unwrap(result)));
-
-    return result;
 }
 
 const Napi::Object GetVersionsObject(const Napi::Env& env) {
@@ -128,17 +88,13 @@ Napi::Promise TestProm(const Napi::CallbackInfo& info) {
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
-    av_log_set_callback(&LogCallback);
-
     exports.Set(Napi::String::New(env, "getProm"), Napi::Function::New(env, TestProm));
     exports.Set(Napi::String::New(env, "getFileInfo"), Napi::Function::New(env, GetFileInfo));
-    exports.Set(Napi::String::New(env, "getLogReader"), Napi::Function::New(env, GetLogReader));
     exports.Set(Napi::String::New(env, "versions"), GetVersionsObject(env));
     exports.Set(Napi::String::New(env, "AvFormatContext"), AvFormatContext::Define(env));
     exports.Set(Napi::String::New(env, "AvDuration"), AvDuration::Define(env));
     exports.Set(Napi::String::New(env, "AvChapter"), AvChapter::Define(env));
     exports.Set(Napi::String::New(env, "AvProgram"), AvProgram::Define(env));
-    exports.Set(Napi::String::New(env, "AvLogReader"), AvLogReader::Define(env));
 
     AvStream::Define(env, exports);
 
