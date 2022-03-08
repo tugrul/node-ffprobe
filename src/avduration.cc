@@ -50,9 +50,7 @@ Napi::Function AvDuration::Define(Napi::Env env) {
 
 bool AvDuration::SetDuration(const Napi::CallbackInfo& info) {
 
-    int64_t param = info[0].As<Napi::Number>();
-
-    duration = param + (param <= INT64_MAX - 5000 ? 5000 : 0);
+    duration = info[0].As<Napi::Number>();
 
     seconds = duration / AV_TIME_BASE;
     microseconds = ((duration % AV_TIME_BASE) * 100) / AV_TIME_BASE;

@@ -5,7 +5,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <functional>
-#include <set>
 #include <queue>
 #include <tuple>
 
@@ -15,19 +14,14 @@ namespace node_ffprobe {
 
 class AvLogReader;
 
-typedef std::set<std::reference_wrapper<AvLogReader>, std::less<AvLogReader>> InstanceSet;
 
 class AvLogReader: public Napi::ObjectWrap<AvLogReader> {
 public:
     AvLogReader(const Napi::CallbackInfo& info);
     static Napi::Function Define(Napi::Env env);
     static Napi::FunctionReference constructor;
-    static void LogCallback(void* ptr, int level, const char* fmt, va_list vl);
-    static void LogWorker();
+    bool Push(const int& level, const std::string& message);
 private:
-    static int printLogPrefix;
-    static std::mutex logMutex;
-    static InstanceSet instances;
 
     std::queue<std::tuple<int, std::string>> logLines;
     std::mutex promiseMutex;
@@ -39,6 +33,7 @@ private:
     Napi::Value Return(const Napi::CallbackInfo& info);
     Napi::Value Throw(const Napi::CallbackInfo& info);
     Napi::Value AsyncIterator(const Napi::CallbackInfo& info);
+    Napi::Value Push(const Napi::CallbackInfo& info);
 };
 
 

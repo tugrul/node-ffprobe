@@ -11,23 +11,13 @@ namespace node_ffprobe {
 
 Napi::FunctionReference AvLogReader::constructor;
 
-int AvLogReader::printLogPrefix = 1;
-
-std::mutex AvLogReader::logMutex;
-
-InstanceSet AvLogReader::instances;
-
 
 AvLogReader::AvLogReader(const Napi::CallbackInfo& info) : 
-Napi::ObjectWrap<AvLogReader>(info), completed(false), started(false), promiseMutex(), cvPromise(), logLines(), readTimeoutMs(5000) {
-
+Napi::ObjectWrap<AvLogReader>(info), completed(false), started(false), promiseMutex(), cvPromise(), logLines(), readTimeoutMs(1000) {
 
     if (info[0].IsNumber()) {
         readTimeoutMs = info[0].As<Napi::Number>();
     }
-
-    std::lock_guard<std::mutex> guard(logMutex);
-    instances.insert(std::ref(*this));
 
 }
 
@@ -102,27 +92,30 @@ Napi::Value AvLogReader::AsyncIterator(const Napi::CallbackInfo& info) {
     return info.This();
 }
 
-void AvLogReader::LogCallback(void* ptr, int level, const char* fmt, va_list vl) {
 
-    std::lock_guard<std::mutex> guard(logMutex);
-
-    if (instances.empty()) {
-        return;
-    }
-
-    char line[256];
-
-    av_log_format_line(ptr, level, fmt, vl, line, sizeof(line), &printLogPrefix);
-
-    for (AvLogReader& instance: instances) {
-        std::lock_guard<std::mutex> guard(instance.promiseMutex);
-
-        instance.logLines.push({level, line});
-        instance.cvPromise.notify_one();
-    }
-
+Napi::Value AvLogReader::Push(const Napi::CallbackInfo& info) {
+    return Napi::Boolean::New(Env(), 
+        Push(info[0].As<Napi::Number>(), info[1].As<Napi::String>()));
 }
 
+bool AvLogReader::Push(const int& level, const std::string& message) {
+
+    if (completed) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> guard(promiseMutex);
+
+    logLines.push({
+        level, 
+        message
+    });
+
+    cvPromise.notify_one();
+
+    return true;
+
+}
 
 Napi::Function AvLogReader::Define(Napi::Env env) {
     
@@ -130,6 +123,7 @@ Napi::Function AvLogReader::Define(Napi::Env env) {
         InstanceMethod<&AvLogReader::Next>("next"), 
         InstanceMethod<&AvLogReader::Return>("return"),
         InstanceMethod<&AvLogReader::Throw>("throw"),
+        InstanceMethod<&AvLogReader::Push>("push"),
         InstanceMethod<&AvLogReader::AsyncIterator>(Napi::Symbol::WellKnown(env, "asyncIterator"))
     });
 

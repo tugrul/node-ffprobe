@@ -188,6 +188,8 @@ export declare class AvLogReader implements AsyncIterableIterator<LogMessage> {
     next(): Promise<IteratorResult<LogMessage, any>>;
     return(value?: any): Promise<IteratorResult<LogMessage, any>>;
     throw(e?: any): Promise<IteratorResult<LogMessage, any>>;
+    push(level: LogLevel, message: string): boolean;
 }
 export declare const versions: Versions;
 export declare function getFileInfo(filePath: string): Promise<AvFormatContext>;
+export declare function getLogReader(timeout?: number): AsyncIterableIterator<LogMessage>;

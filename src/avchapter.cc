@@ -9,17 +9,17 @@ AvChapter::AvChapter(const Napi::CallbackInfo& info) :
     Napi::ObjectWrap<AvChapter>(info)  {
 
     if (!info[0].IsNumber()) {
-        Napi::TypeError::New(Env(), "Chapter ID value should be numberic").ThrowAsJavaScriptException();
+        Napi::TypeError::New(Env(), "Chapter ID value should be numeric").ThrowAsJavaScriptException();
         return;
     }
 
     if (!info[1].IsNumber()) {
-        Napi::TypeError::New(Env(), "Chapter start time should be numberic").ThrowAsJavaScriptException();
+        Napi::TypeError::New(Env(), "Chapter start time should be numeric").ThrowAsJavaScriptException();
         return;
     }
 
     if (!info[2].IsNumber()) {
-        Napi::TypeError::New(Env(), "Chapter end time should be numberic").ThrowAsJavaScriptException();
+        Napi::TypeError::New(Env(), "Chapter end time should be numeric").ThrowAsJavaScriptException();
         return;
     }
 
@@ -34,11 +34,18 @@ AvChapter::AvChapter(const Napi::CallbackInfo& info) :
             info[2].As<Napi::Number>(), napi_enumerable)
     });
 
-    if (info[3].IsObject()) {
+    if (info[3].IsObject() && !info[3].IsArray()) {
         that.DefineProperty(Napi::PropertyDescriptor::Value("metadata",
             info[3].As<Napi::Object>(), napi_enumerable));
-    } else if (!info[3].IsUndefined()) {
-        Napi::TypeError::New(Env(), "Metadata parameter type is invalid").ThrowAsJavaScriptException();
+    } else {
+
+        if (info[3].IsUndefined()) {
+            that.DefineProperty(Napi::PropertyDescriptor::Value("metadata",
+                Napi::Object::New(Env()), napi_enumerable));
+        } else {
+            Napi::TypeError::New(Env(), "Metadata parameter type is invalid").ThrowAsJavaScriptException();
+        }
+
     }
 }
 
