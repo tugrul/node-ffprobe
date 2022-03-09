@@ -9,22 +9,22 @@ AvProgram::AvProgram(const Napi::CallbackInfo& info) :
     Napi::ObjectWrap<AvProgram>(info)  {
 
     if (!info[0].IsNumber()) {
-        Napi::TypeError::New(Env(), "Program ID value should be numberic").ThrowAsJavaScriptException();
+        Napi::TypeError::New(Env(), "Program ID value should be numeric").ThrowAsJavaScriptException();
         return;
     }
 
     if (!info[1].IsNumber()) {
-        Napi::TypeError::New(Env(), "Flags value should be numberic").ThrowAsJavaScriptException();
+        Napi::TypeError::New(Env(), "Flags value should be numeric").ThrowAsJavaScriptException();
         return;
     }
 
     if (!info[2].IsNumber()) {
-        Napi::TypeError::New(Env(), "Discard value should be numberic").ThrowAsJavaScriptException();
+        Napi::TypeError::New(Env(), "Discard value should be numeric").ThrowAsJavaScriptException();
         return;
     }
 
     if (!info[3].IsArray()) {
-        Napi::TypeError::New(Env(), "Streams value should be array").ThrowAsJavaScriptException();
+        Napi::TypeError::New(Env(), "Streams value should be an array").ThrowAsJavaScriptException();
         return;
     }
 
@@ -41,7 +41,7 @@ AvProgram::AvProgram(const Napi::CallbackInfo& info) :
             info[3].As<Napi::Array>(), napi_enumerable)
     });
 
-    if (info[4].IsObject()) {
+    if (info[4].IsObject() && !info[4].IsArray()) {
         that.DefineProperty(Napi::PropertyDescriptor::Value("metadata",
             info[4].As<Napi::Object>(), napi_enumerable));
     } else if (!info[4].IsUndefined()) {

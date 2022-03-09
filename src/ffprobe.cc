@@ -64,31 +64,8 @@ const Napi::Object GetVersionsObject(const Napi::Env& env) {
 }
 
 
-Napi::Promise TestProm(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
-
-    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
-
-    uint8_t number = 0;
-
-    std::thread runner([&number] {
-
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-
-        number = 10;
-
-    });
-
-    runner.join();
-
-    deferred.Resolve(Napi::Number::New(env, number));
-
-    return deferred.Promise();
-}
-
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
-    exports.Set(Napi::String::New(env, "getProm"), Napi::Function::New(env, TestProm));
     exports.Set(Napi::String::New(env, "getFileInfo"), Napi::Function::New(env, GetFileInfo));
     exports.Set(Napi::String::New(env, "versions"), GetVersionsObject(env));
     exports.Set(Napi::String::New(env, "AvFormatContext"), AvFormatContext::Define(env));

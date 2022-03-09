@@ -25,13 +25,15 @@ AvStream::AvStream(const Napi::CallbackInfo& info) :
 
     AvStreamContext* data = *static_cast<AvStreamContext**>(info.Data());
 
-    context = data->context;
-    format = data->format;
-
-    if (context == nullptr) {
+    if (data == nullptr) {
         Napi::Error::New(Env(), "Direct initialization is not allowed for this wrapper class").ThrowAsJavaScriptException();
         return;
     }
+
+    context = data->context;
+    format = data->format;
+
+    
 
     Napi::Object that = info.This().As<Napi::Object>();
     ExportCommonInfo(that);
