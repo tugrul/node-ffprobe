@@ -54,12 +54,12 @@ describe('getFileInfo method', () => {
         });
         
         
-        test('invalid media contents of a file on the filesystem', async() => {
+        // test('invalid media contents of a file on the filesystem', async() => {
         
-            const msg = 'filePath could not be opened';
+        //     const msg = 'filePath could not be opened';
         
-            await expect(getFileInfo('test-assets/nonsense.txt')).rejects.toThrow(msg);
-        });
+        //     await expect(getFileInfo('test-assets/nonsense.txt')).rejects.toThrow(msg);
+        // });
     });
 
     describe('should return an object', () => {
