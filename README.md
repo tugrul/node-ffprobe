@@ -1,4 +1,10 @@
-# node-ffprobe
+# node-ffprobe ![main workflow](https://github.com/tugrul/node-ffprobe/actions/workflows/main.yml/badge.svg)
+
+nodejs native bindings addon of ffprobe library
+
+## Installation
+
+```npm install --save @tugrul/ffprobe```
 
 ## Usage
 
