@@ -45,6 +45,7 @@ export declare type AvRational = [number, number];
 export declare class AvStreamVideo implements StreamBase {
     private constructor();
     readonly id: number | null;
+    readonly typeName: 'video';
     readonly duration: AvDuration | null;
     readonly startTime: AvDuration | null;
     readonly codecTag: string | null;
@@ -73,6 +74,7 @@ export declare class AvStreamVideo implements StreamBase {
 export declare class AvStreamAudio implements StreamBase {
     private constructor();
     readonly id: number | null;
+    readonly typeName: 'audio';
     readonly duration: AvDuration | null;
     readonly startTime: AvDuration | null;
     readonly codecTag: string | null;
@@ -94,6 +96,7 @@ export declare class AvStreamAudio implements StreamBase {
 export declare class AvStreamData implements StreamBase {
     private constructor();
     readonly id: number | null;
+    readonly typeName: 'data';
     readonly duration: AvDuration | null;
     readonly startTime: AvDuration | null;
     readonly codecTag: string | null;
@@ -108,6 +111,7 @@ export declare class AvStreamData implements StreamBase {
 export declare class AvStreamSubtitle implements StreamBase {
     private constructor();
     readonly id: number | null;
+    readonly typeName: 'subtitle';
     readonly duration: AvDuration | null;
     readonly startTime: AvDuration | null;
     readonly codecTag: string | null;
@@ -123,6 +127,7 @@ export declare class AvStreamSubtitle implements StreamBase {
 export declare class AvStreamAttachment implements StreamBase {
     private constructor();
     readonly id: number | null;
+    readonly typeName: 'attachment';
     readonly duration: AvDuration | null;
     readonly startTime: AvDuration | null;
     readonly codecTag: string | null;
@@ -170,16 +175,6 @@ export interface Versions {
     readonly avformat: string;
     readonly avcodec: string;
     readonly avutil: string;
-}
-export declare enum LogLevel {
-    Panic = 0,
-    Fatal = 8,
-    Error = 16,
-    Warning = 24,
-    Info = 32,
-    Verbose = 40,
-    Debug = 48,
-    Trace = 56
 }
 
 export declare const versions: Versions;

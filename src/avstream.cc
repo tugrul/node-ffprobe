@@ -342,21 +342,28 @@ Napi::Value AvStream::GetAudioBitsPerRawSample() {
 }
 
 void AvStream::ExportDataInfo(Napi::Object that) {
-    that.Set(Napi::String::New(Env(), "tbn"), GetDataTbn());
+
+    that.DefineProperties({
+        Napi::PropertyDescriptor::Value("typeName", Napi::String::New(Env(), "data"), napi_enumerable),
+        Napi::PropertyDescriptor::Value("tbn", GetDataTbn(), napi_enumerable),
+    });
 }
 
 void AvStream::ExportSubtitleInfo(Napi::Object that) {
 
     const AVCodecParameters* codecpar = context->codecpar;
 
-    that.Set(Napi::String::New(Env(), "width"),
-        Napi::Number::New(Env(), (int)codecpar->width));
-
-    that.Set(Napi::String::New(Env(), "height"),
-        Napi::Number::New(Env(), (int)codecpar->height));
+    that.DefineProperties({
+        Napi::PropertyDescriptor::Value("typeName", Napi::String::New(Env(), "subtitle"), napi_enumerable),
+        Napi::PropertyDescriptor::Value("width", Napi::Number::New(Env(), (int)codecpar->width), napi_enumerable),
+        Napi::PropertyDescriptor::Value("height", Napi::Number::New(Env(), (int)codecpar->height), napi_enumerable)
+    });
 }
 
 void AvStream::ExportAttachmentInfo(Napi::Object that) {
+    that.DefineProperties({
+        Napi::PropertyDescriptor::Value("typeName", Napi::String::New(Env(), "attachment"), napi_enumerable)
+    });
 }
 
 Napi::Value AvStream::GetVideoFps() {
@@ -512,6 +519,7 @@ void AvStream::ExportVideoInfo(Napi::Object that) {
     const AVCodecParameters* codecpar = context->codecpar;
 
     that.DefineProperties({
+        Napi::PropertyDescriptor::Value("typeName", Napi::String::New(Env(), "video"), napi_enumerable),
         Napi::PropertyDescriptor::Value("pixFmt", GetVideoPixelFormat(), napi_enumerable),
         Napi::PropertyDescriptor::Value("bpc", GetVideoBpc(), napi_enumerable),
         Napi::PropertyDescriptor::Value("colorRange", GetVideoColorRange(), napi_enumerable),
@@ -536,6 +544,8 @@ void AvStream::ExportAudioInfo(Napi::Object that) {
     const AVCodecParameters* codecpar = context->codecpar;
 
     that.DefineProperties({
+        Napi::PropertyDescriptor::Value("typeName", Napi::String::New(Env(), "audio"), napi_enumerable),
+
         Napi::PropertyDescriptor::Value("frameSize",
             Napi::Number::New(Env(), (int)codecpar->frame_size), napi_enumerable),
 
