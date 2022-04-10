@@ -2,6 +2,13 @@
   "name": "@tugrul/ffprobe",
   "version": "1.0.0",
   "author": "Tuğrul Topuz <tugrultopuz@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/tugrul/node-ffprobe/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tugrul/node-ffprobe.git"
+  },
   "license": "MIT",
   "main": "index.js",
   "types": "index.d.ts",
