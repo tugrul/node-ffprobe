@@ -80,7 +80,9 @@ Napi::Array AvFormatContext::ExportStreamInfo(Napi::Object that) {
 
     std::lock_guard<std::mutex> guard(sharedContextMutex);
 
-    sharedContext = new AvStreamContext({.format= context->iformat, .context = nullptr});
+    sharedContext = new AvStreamContext();
+    sharedContext->format = context->iformat;
+    sharedContext->context = nullptr;
 
     for (size_t i = 0; i < context->nb_streams; i++) {
 
