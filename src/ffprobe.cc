@@ -32,14 +32,46 @@ Napi::Promise GetFileInfo(const Napi::CallbackInfo& info) {
 
     Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
 
-    if (!info[0].IsString()) {
-        deferred.Reject(Napi::TypeError::New(env, Napi::String::New(env,"filePath parameter should be a string value")).Value());
+    std::string filePath;
+    int64_t probeSize = 0;
+    int64_t analyzeDuration = 0;
+
+    if (info[0].IsString()) {
+
+        filePath = info[0].As<Napi::String>();
+    }
+    else if (info[0].IsObject()) {
+
+        Napi::Object obj = info[0].As<Napi::Object>();
+
+        if (!obj.Has("filePath") || !obj.Get("filePath").IsString()) {
+            deferred.Reject(Napi::TypeError::New(env, "Missing or invalid 'filePath' field").Value());
+            return deferred.Promise();
+        }
+
+        filePath = obj.Get("filePath").As<Napi::String>();
+
+        if (obj.Has("options") && obj.Get("options").IsObject()) {
+
+            Napi::Object opts = obj.Get("options").As<Napi::Object>();
+
+            if (opts.Has("probeSize") && opts.Get("probeSize").IsNumber()) {
+                probeSize = opts.Get("probeSize").As<Napi::Number>().Int64Value();
+            }
+
+            if (opts.Has("analyzeDuration") && opts.Get("analyzeDuration").IsNumber()) {
+                analyzeDuration = opts.Get("analyzeDuration").As<Napi::Number>().Int64Value();
+            }
+        }
+    }
+    else {
+
+        deferred.Reject(Napi::TypeError::New(env, "Expected string or object as first argument").Value());
         return deferred.Promise();
     }
 
-    std::string filePath = info[0].As<Napi::String>();
 
-    MediaInfoWorker* worker = new MediaInfoWorker(env, filePath, std::move(deferred));
+    MediaInfoWorker* worker = new MediaInfoWorker(env, filePath, probeSize, analyzeDuration, std::move(deferred));
 
     worker->Queue();
 

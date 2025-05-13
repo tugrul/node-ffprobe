@@ -18,6 +18,18 @@ ffprobe.getFileInfo('sample.mp4').then(result => {
 
 ```
 
+passing in probesize and analyzeduration 
+
+```javascript
+
+const ffprobe = require('@tugrul/ffprobe');
+
+ffprobe.getFileInfo({ filePath: 'sample.mp4', options: { probeSize: 1 * 1024 * 1024 * 1024, analyzeDuration: 1000 * 1000000 } }).then(result => {
+    console.log(result);
+});
+
+```
+
 
 ## Build Options
 

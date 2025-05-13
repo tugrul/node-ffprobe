@@ -7,9 +7,11 @@ namespace node_ffprobe {
 AVFormatContext* MediaInfoWorker::sharedContext = nullptr;
 std::mutex MediaInfoWorker::sharedContextMutex;
 
-MediaInfoWorker::MediaInfoWorker(const Napi::Env& env, const std::string& fileName, Napi::Promise::Deferred&& def): 
+MediaInfoWorker::MediaInfoWorker(const Napi::Env& env, const std::string& fileName, const uint64_t probeSize, const uint64_t analyzeDuration, Napi::Promise::Deferred&& def): 
         Napi::AsyncWorker(env), 
         fileName(fileName), 
+	probeSize(probeSize),
+        analyzeDuration(analyzeDuration),
         deferred(std::move(def)) {}
 
 void MediaInfoWorker::Execute() {
@@ -21,7 +23,21 @@ void MediaInfoWorker::Execute() {
         return;
     }
 
-    int openStatus = avformat_open_input(&avFormatContext, fileName.c_str(), NULL, NULL);
+    AVDictionary* options = nullptr;
+
+    if (probeSize) {
+        av_dict_set_int(&options, "probesize", probeSize, 0);
+    }
+
+    if (analyzeDuration) {
+        av_dict_set_int(&options, "analyzeduration", analyzeDuration, 0);
+    }
+
+    int openStatus = avformat_open_input(&avFormatContext, fileName.c_str(), NULL, &options);
+
+    if (options) {
+        av_dict_free(&options);
+    }
 
     if (openStatus < 0) {
         Napi::AsyncWorker::SetError("filePath could not be opened");
