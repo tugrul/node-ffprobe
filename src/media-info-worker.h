@@ -16,7 +16,7 @@ namespace node_ffprobe {
 
 class MediaInfoWorker : public Napi::AsyncWorker {
 public:
-    MediaInfoWorker(const Napi::Env& env, const std::string& fileName, Napi::Promise::Deferred&& def);
+    MediaInfoWorker(const Napi::Env& env, const std::string& fileName, const uint64_t probeSize, const uint64_t analyzeDuration, Napi::Promise::Deferred&& def);
     void Execute() override;
     void OnOK() override;
     void OnError(const Napi::Error& error) override;
@@ -26,6 +26,8 @@ public:
 
 private:
     std::string fileName;
+    int64_t probeSize;
+    int64_t analyzeDuration;
     Napi::Promise::Deferred deferred;
     static std::mutex sharedContextMutex;
     AVFormatContext* avFormatContext = nullptr;
