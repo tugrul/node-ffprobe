@@ -177,5 +177,10 @@ export interface Versions {
     readonly avutil: string;
 }
 
+export interface FileInfoOptions {
+    probeSize: number;
+    analyzeDuration: number;
+}
+
 export declare const versions: Versions;
-export declare function getFileInfo(filePath: string): Promise<AvFormatContext>;
+export declare function getFileInfo(filePath: string, options?: FileInfoOptions): Promise<AvFormatContext>;

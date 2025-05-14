@@ -53,6 +53,14 @@ describe('getFileInfo method', () => {
             await expect(getFileInfo('test-assets/test')).rejects.toThrow(msg);
         });
         
+        test('invalid type of options', async() => {
+
+            const msg = 'options can only be an object';
+        
+            await expect(getFileInfo('test-assets/test.mp4', 123)).rejects.toThrow(msg);
+            await expect(getFileInfo('test-assets/test.mp4', null)).rejects.toThrow(msg);
+            await expect(getFileInfo('test-assets/test.mp4', 'asdf')).rejects.toThrow(msg);
+        });
         
         // test('invalid media contents of a file on the filesystem', async() => {
         
