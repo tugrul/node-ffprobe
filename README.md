@@ -26,7 +26,7 @@ Available options are: probeSize, analyzeDuration
 
 const ffprobe = require('@tugrul/ffprobe');
 
-ffprobe.getFileInfo(sample.mp4, { probeSize: 1 * 1024 * 1024 * 1024, analyzeDuration: 1000 * 1000000 }).then(result => {
+ffprobe.getFileInfo('sample.mp4', { probeSize: 1 * 1024 * 1024 * 1024, analyzeDuration: 1000 * 1000000 }).then(result => {
     console.log(result);
 });
 
