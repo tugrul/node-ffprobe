@@ -11,7 +11,6 @@ class AvProgram : public Napi::ObjectWrap<AvProgram> {
 public:
     AvProgram(const Napi::CallbackInfo& info); 
     static Napi::Function Define(Napi::Env env);
-    static Napi::FunctionReference constructor;
 };
 
 

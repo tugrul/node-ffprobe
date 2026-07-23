@@ -11,7 +11,6 @@ class AvChapter : public Napi::ObjectWrap<AvChapter> {
 public:
     AvChapter(const Napi::CallbackInfo& info); 
     static Napi::Function Define(Napi::Env env);
-    static Napi::FunctionReference constructor;
 };
 
 

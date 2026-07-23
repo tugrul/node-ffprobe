@@ -423,6 +423,66 @@ describe('AvDuration class', () => {
 
 });
 
+describe('worker_threads', () => {
+
+    test('each environment gets its own constructors', async() => {
+
+        const {Worker} = require('worker_threads');
+        const path = require('path');
+
+        const addon = JSON.stringify(path.resolve(__dirname));
+        const asset = JSON.stringify(path.resolve(__dirname, 'test-assets/test.mp4'));
+
+        const source = `
+            const {parentPort} = require('worker_threads');
+            const ffprobe = require(${addon});
+
+            (async () => {
+                try {
+                    for (let i = 0; i < 20; i++) {
+                        const result = await ffprobe.getFileInfo(${asset});
+
+                        if (!(result instanceof ffprobe.AvFormatContext)) {
+                            throw new Error('result is not an AvFormatContext of this environment');
+                        }
+
+                        if (!(result.duration instanceof ffprobe.AvDuration)) {
+                            throw new Error('duration is not an AvDuration of this environment');
+                        }
+                    }
+
+                    parentPort.postMessage({typeName: 'video', streams: 3});
+                } catch (error) {
+                    parentPort.postMessage({error: error.message});
+                }
+            })();
+        `;
+
+        const workers = [0, 1, 2, 3].map(() => new Promise((resolve, reject) => {
+            const worker = new Worker(source, {eval: true});
+            worker.on('message', resolve);
+            worker.on('error', reject);
+        }));
+
+        // Keep the main environment busy at the same time.
+        const main = (async () => {
+            for (let i = 0; i < 20; i++) {
+                await getFileInfo('test-assets/test.mp4');
+            }
+        })();
+
+        const results = await Promise.all(workers);
+
+        await main;
+
+        for (const result of results) {
+            expect(result).toEqual({typeName: 'video', streams: 3});
+        }
+
+    }, 30000);
+
+});
+
 describe('AvStream classes', () => {
 
     test('throw an Error from constructor because it is private', () => {

@@ -11,11 +11,6 @@
 
 namespace node_ffprobe {
 
-AvStreamContext* AvFormatContext::sharedContext = nullptr;
-std::mutex AvFormatContext::sharedContextMutex;
-
-Napi::FunctionReference AvFormatContext::constructor;
-
 AvFormatContext::AvFormatContext(const Napi::CallbackInfo& info) :
     Napi::ObjectWrap<AvFormatContext>(info) {
 
@@ -60,11 +55,11 @@ void AvFormatContext::ExportCommonInfo(Napi::Object that) {
             Napi::Number::New(Env(), context->bit_rate), napi_enumerable), 
 
         Napi::PropertyDescriptor::Value("duration",
-            context->duration == AV_NOPTS_VALUE ? Env().Null() : AvDuration::constructor.New({Napi::Number::New(Env(), context->duration)}), 
+            context->duration == AV_NOPTS_VALUE ? Env().Null() : GetInstanceData(Env())->avDuration.New({Napi::Number::New(Env(), context->duration)}), 
             napi_enumerable), 
             
         Napi::PropertyDescriptor::Value("startTime",
-            context->start_time == AV_NOPTS_VALUE ? Env().Null() : AvDuration::constructor.New({Napi::Number::New(Env(), context->start_time)}), 
+            context->start_time == AV_NOPTS_VALUE ? Env().Null() : GetInstanceData(Env())->avDuration.New({Napi::Number::New(Env(), context->start_time)}), 
             napi_enumerable),
 
         Napi::PropertyDescriptor::Value("flags",
@@ -79,14 +74,14 @@ void AvFormatContext::ExportCommonInfo(Napi::Object that) {
 
 Napi::Array AvFormatContext::ExportStreamInfo(Napi::Object that) {
 
-    Napi::Array streams = Napi::Array::New(Env(), (size_t)context->nb_streams);
+    InstanceData* instanceData = GetInstanceData(Env());
 
-    std::lock_guard<std::mutex> guard(sharedContextMutex);
+    Napi::Array streams = Napi::Array::New(Env(), (size_t)context->nb_streams);
 
     AvStreamContext streamContext;
     streamContext.format = context->iformat;
 
-    SharedSlot<AvStreamContext> slot(&sharedContext, &streamContext);
+    SharedSlot<AvStreamContext> slot(&instanceData->streamContextSlot, &streamContext);
 
     for (size_t i = 0; i < context->nb_streams; i++) {
 
@@ -94,31 +89,31 @@ Napi::Array AvFormatContext::ExportStreamInfo(Napi::Object that) {
 
         switch (streamContext.context->codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO:
-            streams[i] = AvStream::consVideo.New({});
+            streams[i] = instanceData->avStreamVideo.New({});
             break;
 
             case AVMEDIA_TYPE_AUDIO:
-            streams[i] = AvStream::consAudio.New({});
+            streams[i] = instanceData->avStreamAudio.New({});
             break;
 
             case AVMEDIA_TYPE_UNKNOWN:
             case AVMEDIA_TYPE_DATA:
-            streams[i] = AvStream::consData.New({});
+            streams[i] = instanceData->avStreamData.New({});
             break;
 
             case AVMEDIA_TYPE_SUBTITLE:
-            streams[i] = AvStream::consSubtitle.New({});
+            streams[i] = instanceData->avStreamSubtitle.New({});
             break;
 
             case AVMEDIA_TYPE_ATTACHMENT:
-            streams[i] = AvStream::consAttachment.New({});
+            streams[i] = instanceData->avStreamAttachment.New({});
             break;
 
             // A codec type this build of FFmpeg does not recognise is reported
             // as a data stream, exactly like AVMEDIA_TYPE_UNKNOWN above, so the
             // array stays dense and index-aligned with AVFormatContext::streams.
             default:
-            streams[i] = AvStream::consData.New({});
+            streams[i] = instanceData->avStreamData.New({});
             break;
         }
     }
@@ -138,7 +133,7 @@ void AvFormatContext::ExportChapterInfo(Napi::Object that) {
 
         double timeBase = av_q2d(chapter->time_base);
         
-        chapters[i] = AvChapter::constructor.New({
+        chapters[i] = GetInstanceData(Env())->avChapter.New({
             Napi::Number::New(Env(), chapter->id),
             Napi::Number::New(Env(), chapter->start * timeBase),
             Napi::Number::New(Env(), chapter->end * timeBase),
@@ -166,7 +161,7 @@ void AvFormatContext::ExportProgramInfo(Napi::Object that, Napi::Array streams) 
             }
         }
 
-        programs[i] = AvProgram::constructor.New({
+        programs[i] = GetInstanceData(Env())->avProgram.New({
             Napi::Number::New(Env(), program->id),
             Napi::Number::New(Env(), program->flags),
             Napi::Number::New(Env(), program->discard),
@@ -183,15 +178,8 @@ void AvFormatContext::ExportProgramInfo(Napi::Object that, Napi::Array streams) 
     that.DefineProperty(Napi::PropertyDescriptor::Value("programs", programs, napi_enumerable));
 }
 
-Napi::Function AvFormatContext::Define(Napi::Env env, AVFormatContext* data) {
-
-    Napi::Function func = DefineClass(env, "AvFormatContext", {}, &MediaInfoWorker::sharedContext);
-
-    constructor = Napi::Persistent(func);
-    constructor.SuppressDestruct();
-
-    return func;
-
+Napi::Function AvFormatContext::Define(Napi::Env env, InstanceData* instanceData) {
+    return DefineClass(env, "AvFormatContext", {}, &instanceData->formatContextSlot);
 }
 
 };

@@ -3,8 +3,6 @@
 
 namespace node_ffprobe {
 
-Napi::FunctionReference AvProgram::constructor;
-
 AvProgram::AvProgram(const Napi::CallbackInfo& info) : 
     Napi::ObjectWrap<AvProgram>(info)  {
 
@@ -86,9 +84,6 @@ AvProgram::AvProgram(const Napi::CallbackInfo& info) :
 Napi::Function AvProgram::Define(Napi::Env env) {
     
     Napi::Function func = DefineClass(env, "AvProgram", {});
-
-    constructor = Napi::Persistent(func);
-    constructor.SuppressDestruct();
 
     return func;
 }

@@ -10,11 +10,6 @@ extern "C" {
 
 namespace node_ffprobe {
 
-Napi::FunctionReference AvStream::consVideo;
-Napi::FunctionReference AvStream::consAudio;
-Napi::FunctionReference AvStream::consData;
-Napi::FunctionReference AvStream::consSubtitle;
-Napi::FunctionReference AvStream::consAttachment;
 
 AvStream::AvStream(const Napi::CallbackInfo& info) : 
     Napi::ObjectWrap<AvStream>(info) {
@@ -56,43 +51,31 @@ AvStream::AvStream(const Napi::CallbackInfo& info) :
 
 }
 
-void AvStream::Define(Napi::Env env, Napi::Object exports) {
+void AvStream::Define(Napi::Env env, Napi::Object exports, InstanceData* instanceData) {
 
-    Napi::Function videoFunc = DefineClass(env, "AvStreamVideo", {}, &AvFormatContext::sharedContext);
+    // All five classes share the payload slot; which one is constructed for a
+    // given stream is decided by AvFormatContext::ExportStreamInfo().
+    struct ClassEntry {
+        const char* name;
+        Napi::FunctionReference* target;
+    };
 
-    consVideo = Napi::Persistent(videoFunc);
-    consVideo.SuppressDestruct();
+    const ClassEntry classes[] = {
+        {"AvStreamVideo",      &instanceData->avStreamVideo},
+        {"AvStreamAudio",      &instanceData->avStreamAudio},
+        {"AvStreamData",       &instanceData->avStreamData},
+        {"AvStreamSubtitle",   &instanceData->avStreamSubtitle},
+        {"AvStreamAttachment", &instanceData->avStreamAttachment}
+    };
 
-    exports.Set(Napi::String::New(env, "AvStreamVideo"), videoFunc);
+    for (const ClassEntry& entry : classes) {
 
+        Napi::Function func = DefineClass(env, entry.name, {}, &instanceData->streamContextSlot);
 
-    Napi::Function audioFunc = DefineClass(env, "AvStreamAudio", {}, &AvFormatContext::sharedContext);
+        *entry.target = Napi::Persistent(func);
 
-    consAudio = Napi::Persistent(audioFunc);
-    consAudio.SuppressDestruct();
-
-    exports.Set(Napi::String::New(env, "AvStreamAudio"), audioFunc);
-
-    Napi::Function dataFunc = DefineClass(env, "AvStreamData", {}, &AvFormatContext::sharedContext);
-
-    consData = Napi::Persistent(dataFunc);
-    consData.SuppressDestruct();
-
-    exports.Set(Napi::String::New(env, "AvStreamData"), dataFunc);
-
-    Napi::Function subtitleFunc = DefineClass(env, "AvStreamSubtitle", {}, &AvFormatContext::sharedContext);
-
-    consSubtitle = Napi::Persistent(subtitleFunc);
-    consSubtitle.SuppressDestruct();
-
-    exports.Set(Napi::String::New(env, "AvStreamSubtitle"), subtitleFunc);
-
-    Napi::Function attachmentFunc = DefineClass(env, "AvStreamAttachment", {}, &AvFormatContext::sharedContext);
-
-    consAttachment = Napi::Persistent(attachmentFunc);
-    consAttachment.SuppressDestruct();
-
-    exports.Set(Napi::String::New(env, "AvStreamAttachment"), attachmentFunc);
+        exports.Set(Napi::String::New(env, entry.name), func);
+    }
 }
 
 
@@ -487,11 +470,11 @@ void AvStream::ExportCommonInfo(Napi::Object that) {
 
         Napi::PropertyDescriptor::Value("duration",
             context->duration == AV_NOPTS_VALUE ? Env().Null() : 
-            AvDuration::constructor.New({Napi::Number::New(Env(), context->duration)}), napi_enumerable),
+            GetInstanceData(Env())->avDuration.New({Napi::Number::New(Env(), context->duration)}), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("startTime",
             context->start_time == AV_NOPTS_VALUE ? Env().Null() : 
-            AvDuration::constructor.New({Napi::Number::New(Env(), context->start_time)}), napi_enumerable),
+            GetInstanceData(Env())->avDuration.New({Napi::Number::New(Env(), context->start_time)}), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("codecTag",
             GetCodecTagName(), napi_enumerable),

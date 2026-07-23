@@ -7,6 +7,7 @@
 
 #include "avduration.h"
 #include "util.h"
+#include "instance-data.h"
 
 extern "C" {
     #include <libavcodec/avcodec.h>
@@ -23,12 +24,7 @@ typedef struct AvStreamContext {
 class AvStream : public Napi::ObjectWrap<AvStream> {
 public:
     AvStream(const Napi::CallbackInfo& info);
-    static void Define(Napi::Env env, Napi::Object exports);
-    static Napi::FunctionReference consVideo;
-    static Napi::FunctionReference consAudio;
-    static Napi::FunctionReference consData;
-    static Napi::FunctionReference consSubtitle;
-    static Napi::FunctionReference consAttachment;
+    static void Define(Napi::Env env, Napi::Object exports, InstanceData* instanceData);
 private:
     void ExportCommonInfo(Napi::Object that);
     void ExportVideoInfo(Napi::Object that);

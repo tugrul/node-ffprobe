@@ -11,7 +11,6 @@ class AvDuration: public Napi::ObjectWrap<AvDuration> {
 public:
     AvDuration(const Napi::CallbackInfo& info);
     static Napi::Function Define(Napi::Env env);
-    static Napi::FunctionReference constructor;
 private:
     Napi::Value GetDuration(const Napi::CallbackInfo& info);
     bool SetDuration(const Napi::CallbackInfo& info);

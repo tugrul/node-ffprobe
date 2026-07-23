@@ -8,8 +8,6 @@ extern "C" {
 
 namespace node_ffprobe {
 
-Napi::FunctionReference AvDuration::constructor;
-
 AvDuration::AvDuration(const Napi::CallbackInfo& info) : 
     Napi::ObjectWrap<AvDuration>(info) {
 
@@ -41,9 +39,6 @@ Napi::Function AvDuration::Define(Napi::Env env) {
         InstanceMethod<&AvDuration::GetDuration>("valueOf"),
         InstanceMethod<&AvDuration::ToString>("toString")
     });
-
-    constructor = Napi::Persistent(func);
-    constructor.SuppressDestruct();
 
     return func;
 }

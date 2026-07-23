@@ -87,14 +87,33 @@ const Napi::Object GetVersionsObject(const Napi::Env& env) {
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
+    // Owned by this environment and destroyed with it. Init() runs once per
+    // environment, so a worker_thread gets its own constructors rather than
+    // overwriting the ones belonging to the main thread.
+    InstanceData* instanceData = new InstanceData();
+
+    env.SetInstanceData(instanceData);
+
     exports.Set(Napi::String::New(env, "getFileInfo"), Napi::Function::New(env, GetFileInfo));
     exports.Set(Napi::String::New(env, "versions"), GetVersionsObject(env));
-    exports.Set(Napi::String::New(env, "AvFormatContext"), AvFormatContext::Define(env));
-    exports.Set(Napi::String::New(env, "AvDuration"), AvDuration::Define(env));
-    exports.Set(Napi::String::New(env, "AvChapter"), AvChapter::Define(env));
-    exports.Set(Napi::String::New(env, "AvProgram"), AvProgram::Define(env));
 
-    AvStream::Define(env, exports);
+    Napi::Function avFormatContext = AvFormatContext::Define(env, instanceData);
+    instanceData->avFormatContext = Napi::Persistent(avFormatContext);
+    exports.Set(Napi::String::New(env, "AvFormatContext"), avFormatContext);
+
+    Napi::Function avDuration = AvDuration::Define(env);
+    instanceData->avDuration = Napi::Persistent(avDuration);
+    exports.Set(Napi::String::New(env, "AvDuration"), avDuration);
+
+    Napi::Function avChapter = AvChapter::Define(env);
+    instanceData->avChapter = Napi::Persistent(avChapter);
+    exports.Set(Napi::String::New(env, "AvChapter"), avChapter);
+
+    Napi::Function avProgram = AvProgram::Define(env);
+    instanceData->avProgram = Napi::Persistent(avProgram);
+    exports.Set(Napi::String::New(env, "AvProgram"), avProgram);
+
+    AvStream::Define(env, exports, instanceData);
 
     return exports;
 }

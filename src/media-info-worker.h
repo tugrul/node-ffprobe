@@ -3,7 +3,6 @@
 #define NODE_FFPROBE_MEDIA_INFO_WORKER_H
 
 #include <napi.h>
-#include <mutex>
 
 extern "C" {
     #include <libavformat/avformat.h>
@@ -25,13 +24,10 @@ public:
     void OnError(const Napi::Error& error) override;
     Napi::Promise GetPromise();
 
-    static AVFormatContext* sharedContext;
-
 private:
     std::string fileName;
     AvDictionary options;
     Napi::Promise::Deferred deferred;
-    static std::mutex sharedContextMutex;
     AVFormatContext* avFormatContext = nullptr;
     int errorCode = 0;
 };

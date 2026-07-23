@@ -1,6 +1,7 @@
 
 #include "media-info-worker.h"
 #include "shared-slot.h"
+#include "instance-data.h"
 
 
 namespace node_ffprobe {
@@ -22,9 +23,6 @@ std::string DescribeAvError(const char* message, int code) {
 }
 
 };
-
-AVFormatContext* MediaInfoWorker::sharedContext = nullptr;
-std::mutex MediaInfoWorker::sharedContextMutex;
 
 MediaInfoWorker::MediaInfoWorker(const Napi::Env& env, const std::string& fileName, AvDictionary&& options, Napi::Promise::Deferred&& def): 
         Napi::AsyncWorker(env), 
@@ -71,12 +69,12 @@ void MediaInfoWorker::Execute() {
 void MediaInfoWorker::OnOK() {
     Napi::HandleScope scope(Env());
 
-    std::lock_guard<std::mutex> guard(sharedContextMutex);
+    InstanceData* instanceData = GetInstanceData(Env());
 
     // Cleared again even if the wrapper's constructor throws.
-    SharedSlot<AVFormatContext> slot(&sharedContext, avFormatContext);
+    SharedSlot<AVFormatContext> slot(&instanceData->formatContextSlot, avFormatContext);
 
-    Napi::Object result = AvFormatContext::constructor.New({});
+    Napi::Object result = instanceData->avFormatContext.New({});
 
     // The wrapper owns the context from here on; it closes it on destruction.
     avFormatContext = nullptr;

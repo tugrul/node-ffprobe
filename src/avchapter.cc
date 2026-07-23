@@ -3,8 +3,6 @@
 
 namespace node_ffprobe {
 
-Napi::FunctionReference AvChapter::constructor;
-
 AvChapter::AvChapter(const Napi::CallbackInfo& info) : 
     Napi::ObjectWrap<AvChapter>(info)  {
 
@@ -52,9 +50,6 @@ AvChapter::AvChapter(const Napi::CallbackInfo& info) :
 Napi::Function AvChapter::Define(Napi::Env env) {
     
     Napi::Function func = DefineClass(env, "AvChapter", {});
-
-    constructor = Napi::Persistent(func);
-    constructor.SuppressDestruct();
 
     return func;
 }

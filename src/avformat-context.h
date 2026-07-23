@@ -3,8 +3,8 @@
 #define NODE_FFPROBE_AVFORMAT_CONTEXT_H
 
 #include <napi.h>
-#include <mutex>
 #include "avstream.h"
+#include "instance-data.h"
 
 extern "C" {
     #include <libavformat/avformat.h>
@@ -16,12 +16,9 @@ class AvFormatContext : public Napi::ObjectWrap<AvFormatContext> {
 public:
     AvFormatContext(const Napi::CallbackInfo& info);    
     ~AvFormatContext();
-    static Napi::Function Define(Napi::Env env, AVFormatContext* data = nullptr);
-    static Napi::FunctionReference constructor;
-    static AvStreamContext* sharedContext;
+    static Napi::Function Define(Napi::Env env, InstanceData* instanceData);
 private:
     AVFormatContext* context = nullptr;
-    static std::mutex sharedContextMutex;
     void ExportCommonInfo(Napi::Object that);
     Napi::Array ExportStreamInfo(Napi::Object that);
     void ExportChapterInfo(Napi::Object that);
