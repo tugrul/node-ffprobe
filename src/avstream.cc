@@ -1,6 +1,7 @@
 
 #include "avstream.h"
 #include "avformat-context.h"
+#include "ffmpeg-compat.h"
 
 extern "C" {
     #include <libavutil/pixdesc.h>
@@ -110,7 +111,7 @@ int64_t AvStream::GetBitRate() {
             bitsPerSample = av_get_bits_per_sample(codecpar->codec_id);
 
             if (bitsPerSample) {
-                bitRate = codecpar->sample_rate * (int64_t)codecpar->channels;
+                bitRate = codecpar->sample_rate * (int64_t)GetChannelCount(codecpar);
                 if (bitRate > INT64_MAX / bitsPerSample) {
                     bitRate = 0;
                 } else {
@@ -303,11 +304,7 @@ Napi::Value AvStream::GetCodecProfileName() {
 }
 
 Napi::Value AvStream::GetAudioChannelLayout() {
-    char buf[256];
-
-    av_get_channel_layout_string(buf, sizeof(buf), context->codecpar->channels, context->codecpar->channel_layout);
-
-    return Napi::String::New(Env(), buf);
+    return Napi::String::New(Env(), GetChannelLayoutString(context->codecpar));
 }
 
 Napi::Value AvStream::GetAudioSampleFormatName() {
@@ -499,7 +496,7 @@ void AvStream::ExportCommonInfo(Napi::Object that) {
             GetCodecProfileName(), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("level",
-            codecpar->level == FF_LEVEL_UNKNOWN ? Env().Null() : Napi::Number::New(Env(), (int)codecpar->level), napi_enumerable),
+            codecpar->level == AV_LEVEL_UNKNOWN ? Env().Null() : Napi::Number::New(Env(), (int)codecpar->level), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("codecName",
             Napi::String::New(Env(), avcodec_get_name(codecpar->codec_id)), napi_enumerable),
@@ -553,7 +550,7 @@ void AvStream::ExportAudioInfo(Napi::Object that) {
             Napi::Number::New(Env(), (int)codecpar->sample_rate), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("channels",
-            Napi::Number::New(Env(), (int)codecpar->channels), napi_enumerable),
+            Napi::Number::New(Env(), GetChannelCount(codecpar)), napi_enumerable),
 
         Napi::PropertyDescriptor::Value("channelLayout",
             GetAudioChannelLayout(), napi_enumerable),
