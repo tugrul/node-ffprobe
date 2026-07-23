@@ -10,18 +10,28 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
+      # One platform failing should not hide the result of the other.
+      fail-fast: false
       matrix:
+        # Ubuntu runners currently provide FFmpeg 6.x and Homebrew provides
+        # 7.x or newer, so the matrix covers both sides of the channel layout
+        # API change handled in src/ffmpeg-compat.h.
+        os: [ubuntu-latest, macos-latest]
         node-version: [18.x, 20.x, 22.x, 23.x, 24.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - name: update apt repository
-      run: sudo apt-get update
-    - name: Install ffmpeg
-      run: sudo apt-get install -y libavcodec-dev libavutil-dev libavformat-dev
+    - name: Install ffmpeg (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libavcodec-dev libavutil-dev libavformat-dev
+    - name: Install ffmpeg (macOS)
+      if: runner.os == 'macOS'
+      run: brew install ffmpeg pkg-config
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -29,5 +39,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm run build --if-present
+    - name: Report the linked FFmpeg version
+      run: node -e "console.log(require('.').versions)"
     - run: npm test
