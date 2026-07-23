@@ -40,6 +40,7 @@ export interface StreamBase {
     readonly codecName: string;
     readonly disposition: Disposition;
     readonly metadata: Metadata;
+    readonly flags: number;
 }
 export declare type AvRational = [number, number];
 export declare class AvStreamVideo implements StreamBase {
@@ -55,6 +56,7 @@ export declare class AvStreamVideo implements StreamBase {
     readonly codecName: string;
     readonly disposition: Disposition;
     readonly metadata: Metadata;
+    readonly flags: number;
     readonly pixFmt: string | null;
     readonly bpc: number | null;
     readonly colorRange: string | null;
@@ -84,6 +86,7 @@ export declare class AvStreamAudio implements StreamBase {
     readonly codecName: string;
     readonly disposition: Disposition;
     readonly metadata: Metadata;
+    readonly flags: number;
     readonly frameSize: number;
     readonly sampleRate: number;
     readonly channels: number;
@@ -106,6 +109,7 @@ export declare class AvStreamData implements StreamBase {
     readonly codecName: string;
     readonly disposition: Disposition;
     readonly metadata: Metadata;
+    readonly flags: number;
     readonly tbn: AvRational | null;
 }
 export declare class AvStreamSubtitle implements StreamBase {
@@ -121,6 +125,7 @@ export declare class AvStreamSubtitle implements StreamBase {
     readonly codecName: string;
     readonly disposition: Disposition;
     readonly metadata: Metadata;
+    readonly flags: number;
     readonly width: number;
     readonly height: number;
 }
@@ -137,6 +142,7 @@ export declare class AvStreamAttachment implements StreamBase {
     readonly codecName: string;
     readonly disposition: Disposition;
     readonly metadata: Metadata;
+    readonly flags: number;
 }
 export declare type Stream = AvStreamVideo | AvStreamAudio | AvStreamData | AvStreamSubtitle | AvStreamAttachment;
 export declare class AvChapter {
@@ -144,7 +150,7 @@ export declare class AvChapter {
     readonly id: number;
     readonly start: number;
     readonly end: number;
-    readonly metadata?: Metadata;
+    readonly metadata: Metadata;
 }
 export declare class AvProgram {
     constructor(programId: number, flags: number, discard: number, streams: Stream[], metadata?: Metadata, programNum?: number, pmtPid?: number, pcrPid?: number, pmtVersion?: number);
@@ -178,9 +184,14 @@ export interface Versions {
 }
 
 export interface FileInfoOptions {
-    probeSize: number;
-    analyzeDuration: number;
+    probeSize?: number;
+    analyzeDuration?: number;
     protocolWhitelist?: string | string[];
+}
+
+export interface AvError extends Error {
+    /** The raw AVERROR code reported by FFmpeg. */
+    readonly code?: number;
 }
 
 export declare const versions: Versions;
