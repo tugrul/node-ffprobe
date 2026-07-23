@@ -114,8 +114,12 @@ Napi::Array AvFormatContext::ExportStreamInfo(Napi::Object that) {
             streams[i] = AvStream::consAttachment.New({});
             break;
 
+            // A codec type this build of FFmpeg does not recognise is reported
+            // as a data stream, exactly like AVMEDIA_TYPE_UNKNOWN above, so the
+            // array stays dense and index-aligned with AVFormatContext::streams.
             default:
-            streamContext.context = nullptr;
+            streams[i] = AvStream::consData.New({});
+            break;
         }
     }
 

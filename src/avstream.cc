@@ -51,7 +51,7 @@ AvStream::AvStream(const Napi::CallbackInfo& info) :
         case AVMEDIA_TYPE_DATA: ExportDataInfo(that); break;
         case AVMEDIA_TYPE_SUBTITLE: ExportSubtitleInfo(that); break;
         case AVMEDIA_TYPE_ATTACHMENT: ExportAttachmentInfo(that); break;
-        default:;
+        default: ExportDataInfo(that); break;
     }
 
 }
