@@ -163,6 +163,10 @@ Napi::Value AvStream::GetVideoBpc() {
 
     const AVPixFmtDescriptor* pixFmtDesc = av_pix_fmt_desc_get(pixFmt);
 
+    if (pixFmtDesc == nullptr) {
+        return Env().Null();
+    }
+
     if (context->codecpar->bits_per_raw_sample < pixFmtDesc->comp[0].depth) {
         return Napi::Number::New(Env(), context->codecpar->bits_per_raw_sample);
     }

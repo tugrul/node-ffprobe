@@ -51,8 +51,10 @@ void AvFormatContext::ExportCommonInfo(Napi::Object that) {
         Napi::PropertyDescriptor::Value("name",
             Napi::String::New(Env(), context->iformat->name), napi_enumerable), 
         
+        // url is left unset by some demuxers; keep the property a string so
+        // the declared type stays accurate.
         Napi::PropertyDescriptor::Value("url",
-            Napi::String::New(Env(), context->url), napi_enumerable), 
+            Napi::String::New(Env(), context->url == nullptr ? "" : context->url), napi_enumerable), 
         
         Napi::PropertyDescriptor::Value("bitrate",
             Napi::Number::New(Env(), context->bit_rate), napi_enumerable), 
