@@ -20,7 +20,7 @@ public:
     static Napi::FunctionReference constructor;
     static AvStreamContext* sharedContext;
 private:
-    AVFormatContext* context;
+    AVFormatContext* context = nullptr;
     static std::mutex sharedContextMutex;
     void ExportCommonInfo(Napi::Object that);
     Napi::Array ExportStreamInfo(Napi::Object that);

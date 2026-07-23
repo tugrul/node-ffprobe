@@ -16,8 +16,8 @@ extern "C" {
 namespace node_ffprobe {
 
 typedef struct AvStreamContext {
-    const AVInputFormat* format;
-    AVStream* context;
+    const AVInputFormat* format = nullptr;
+    AVStream* context = nullptr;
 } AvStreamContext;
 
 class AvStream : public Napi::ObjectWrap<AvStream> {
@@ -56,8 +56,8 @@ private:
     Napi::Value GetAudioBitsPerRawSample();
     Napi::Object GetDisposition();
     int64_t GetBitRate();
-    AVStream* context;
-    const AVInputFormat* format;
+    AVStream* context = nullptr;
+    const AVInputFormat* format = nullptr;
 };
 
 
