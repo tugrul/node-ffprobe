@@ -6,6 +6,7 @@
 #include "avduration.h"
 #include "avchapter.h"
 #include "avprogram.h"
+#include "shared-slot.h"
 
 
 namespace node_ffprobe {
@@ -80,15 +81,16 @@ Napi::Array AvFormatContext::ExportStreamInfo(Napi::Object that) {
 
     std::lock_guard<std::mutex> guard(sharedContextMutex);
 
-    sharedContext = new AvStreamContext();
-    sharedContext->format = context->iformat;
-    sharedContext->context = nullptr;
+    AvStreamContext streamContext;
+    streamContext.format = context->iformat;
+
+    SharedSlot<AvStreamContext> slot(&sharedContext, &streamContext);
 
     for (size_t i = 0; i < context->nb_streams; i++) {
 
-        sharedContext->context = context->streams[i];
-        
-        switch (sharedContext->context->codecpar->codec_type) {
+        streamContext.context = context->streams[i];
+
+        switch (streamContext.context->codecpar->codec_type) {
             case AVMEDIA_TYPE_VIDEO:
             streams[i] = AvStream::consVideo.New({});
             break;
@@ -111,12 +113,9 @@ Napi::Array AvFormatContext::ExportStreamInfo(Napi::Object that) {
             break;
 
             default:
-            sharedContext->context = nullptr;
+            streamContext.context = nullptr;
         }
     }
-
-    delete sharedContext;
-    sharedContext = nullptr;
 
     that.DefineProperty(Napi::PropertyDescriptor::Value("streams", streams, napi_enumerable));
 

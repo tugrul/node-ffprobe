@@ -1,5 +1,6 @@
 
 #include "media-info-worker.h"
+#include "shared-slot.h"
 
 
 namespace node_ffprobe {
@@ -49,11 +50,10 @@ void MediaInfoWorker::OnOK() {
 
     std::lock_guard<std::mutex> guard(sharedContextMutex);
 
-    sharedContext = avFormatContext;
+    // Cleared again even if the wrapper's constructor throws.
+    SharedSlot<AVFormatContext> slot(&sharedContext, avFormatContext);
 
     Napi::Object result = AvFormatContext::constructor.New({});
-
-    sharedContext = nullptr;
 
     // The wrapper owns the context from here on; it closes it on destruction.
     avFormatContext = nullptr;
