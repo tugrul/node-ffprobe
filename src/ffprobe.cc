@@ -56,6 +56,43 @@ Napi::Promise GetFileInfo(const Napi::CallbackInfo& info) {
         if (opts.Has("analyzeDuration") && opts.Get("analyzeDuration").IsNumber()) {
             options.set("analyzeduration", opts.Get("analyzeDuration").As<Napi::Number>().Int64Value());
         }
+
+        if (opts.Has("protocolWhitelist") && !opts.Get("protocolWhitelist").IsUndefined()) {
+
+            Napi::Value whitelist = opts.Get("protocolWhitelist");
+            std::string value;
+
+            if (whitelist.IsString()) {
+                value = whitelist.As<Napi::String>().Utf8Value();
+            } else if (whitelist.IsArray()) {
+
+                Napi::Array entries = whitelist.As<Napi::Array>();
+
+                for (uint32_t index = 0; index < entries.Length(); index++) {
+
+                    Napi::Value entry = entries.Get(index);
+
+                    if (!entry.IsString()) {
+                        deferred.Reject(Napi::TypeError::New(env, Napi::String::New(env,
+                            "protocolWhitelist entries should be string values")).Value());
+                        return deferred.Promise();
+                    }
+
+                    if (index > 0) {
+                        value += ",";
+                    }
+
+                    value += entry.As<Napi::String>().Utf8Value();
+                }
+
+            } else {
+                deferred.Reject(Napi::TypeError::New(env, Napi::String::New(env,
+                    "protocolWhitelist can only be a string or an array of strings")).Value());
+                return deferred.Promise();
+            }
+
+            options.set("protocol_whitelist", value);
+        }
     }
 
     std::string filePath = info[0].As<Napi::String>();

@@ -180,6 +180,7 @@ export interface Versions {
 export interface FileInfoOptions {
     probeSize: number;
     analyzeDuration: number;
+    protocolWhitelist?: string | string[];
 }
 
 export declare const versions: Versions;

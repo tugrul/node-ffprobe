@@ -20,7 +20,7 @@ ffprobe.getFileInfo('sample.mp4').then(result => {
 
 ## Passing options
 
-Available options are: probeSize, analyzeDuration
+Available options are: probeSize, analyzeDuration, protocolWhitelist
 
 ```javascript
 
@@ -32,6 +32,28 @@ ffprobe.getFileInfo('sample.mp4', { probeSize: 1 * 1024 * 1024 * 1024, analyzeDu
 
 ```
 
+
+## Restricting protocols
+
+`getFileInfo` hands its first argument to FFmpeg, which resolves it the same way
+the `ffprobe` command line tool does. That includes network protocols such as
+`http:` and `rtmp:`, and playlist formats such as HLS or `.m3u` can reference
+further files by URL. If the path comes from an untrusted source, restrict what
+FFmpeg is allowed to open:
+
+```javascript
+
+const ffprobe = require('@tugrul/ffprobe');
+
+ffprobe.getFileInfo(userSuppliedPath, { protocolWhitelist: ['file'] }).then(result => {
+    console.log(result);
+});
+
+```
+
+The value maps to FFmpeg's `protocol_whitelist` option and accepts either an
+array or a comma separated string. It is unset by default, so existing callers
+that probe remote URLs keep working.
 
 ## Build Options
 
