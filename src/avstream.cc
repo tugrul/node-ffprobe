@@ -34,23 +34,26 @@ AvStream::AvStream(const Napi::CallbackInfo& info) :
     context = data->context;
     format = data->format;
 
-    
+    // ExportCommonInfo() dereferences codecpar straight away, so the check has
+    // to happen before it rather than after.
+    if (context->codecpar == nullptr) {
+        Napi::Error::New(Env(), "stream has no codec parameters").ThrowAsJavaScriptException();
+        return;
+    }
 
     Napi::Object that = info.This().As<Napi::Object>();
     ExportCommonInfo(that);
 
-    if (context->codecpar != nullptr) {
-        switch (context->codecpar->codec_type) {
-            case AVMEDIA_TYPE_VIDEO: ExportVideoInfo(that); break;
-            case AVMEDIA_TYPE_AUDIO: ExportAudioInfo(that); break;
-            case AVMEDIA_TYPE_UNKNOWN:
-            case AVMEDIA_TYPE_DATA: ExportDataInfo(that); break;
-            case AVMEDIA_TYPE_SUBTITLE: ExportSubtitleInfo(that); break;
-            case AVMEDIA_TYPE_ATTACHMENT: ExportAttachmentInfo(that); break; 
-            default:;
-        }
+    switch (context->codecpar->codec_type) {
+        case AVMEDIA_TYPE_VIDEO: ExportVideoInfo(that); break;
+        case AVMEDIA_TYPE_AUDIO: ExportAudioInfo(that); break;
+        case AVMEDIA_TYPE_UNKNOWN:
+        case AVMEDIA_TYPE_DATA: ExportDataInfo(that); break;
+        case AVMEDIA_TYPE_SUBTITLE: ExportSubtitleInfo(that); break;
+        case AVMEDIA_TYPE_ATTACHMENT: ExportAttachmentInfo(that); break;
+        default:;
     }
-    
+
 }
 
 void AvStream::Define(Napi::Env env, Napi::Object exports) {
