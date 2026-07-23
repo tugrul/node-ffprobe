@@ -1,7 +1,7 @@
 {
   "name": "@tugrul/ffprobe",
   "version": "1.0.4",
-  "author": "Tuğrul Topuz <tugrultopuz@gmail.com>",
+  "author": "Tu\u011frul Topuz <tugrultopuz@gmail.com>",
   "bugs": {
     "url": "https://github.com/tugrul/node-ffprobe/issues"
   },
@@ -18,10 +18,10 @@
   },
   "dependencies": {
     "bindings": "^1.5.0",
+    "cmake-js": "^7.3.1",
     "node-addon-api": "^4.2.0"
   },
   "devDependencies": {
-    "cmake-js": "^7.3.1",
     "jest": "^27.5.1"
   }
 }
