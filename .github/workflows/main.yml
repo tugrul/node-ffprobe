@@ -1,6 +1,9 @@
 
 name: Build & Test
 
+env:
+  HOMEBREW_NO_REQUIRE_TAP_TRUST: "1"
+
 on:
   push:
     branches: [ master ]
