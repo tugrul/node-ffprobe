@@ -62,12 +62,21 @@ describe('getFileInfo method', () => {
             await expect(getFileInfo('test-assets/test.mp4', 'asdf')).rejects.toThrow(msg);
         });
         
-        // test('invalid media contents of a file on the filesystem', async() => {
-        
-        //     const msg = 'filePath could not be opened';
-        
-        //     await expect(getFileInfo('test-assets/nonsense.txt')).rejects.toThrow(msg);
-        // });
+        test('invalid media contents of a file on the filesystem', async() => {
+
+            const msg = 'filePath could not be opened';
+
+            await expect(getFileInfo('test-assets/nonsense.txt')).rejects.toThrow(msg);
+        });
+
+        test('expose the underlying FFmpeg error', async() => {
+
+            await expect(getFileInfo('no/such/file.mp4'))
+                .rejects.toThrow('No such file or directory');
+
+            await expect(getFileInfo('no/such/file.mp4'))
+                .rejects.toMatchObject({code: expect.any(Number)});
+        });
     });
 
     describe('should return an object', () => {

@@ -7,6 +7,7 @@
 
 extern "C" {
     #include <libavformat/avformat.h>
+    #include <libavutil/error.h>
 }
 
 #include "avformat-context.h"
@@ -32,6 +33,7 @@ private:
     Napi::Promise::Deferred deferred;
     static std::mutex sharedContextMutex;
     AVFormatContext* avFormatContext = nullptr;
+    int errorCode = 0;
 };
 
 };

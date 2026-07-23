@@ -5,6 +5,24 @@
 
 namespace node_ffprobe {
 
+namespace {
+
+/** Appends FFmpeg's own description of an AVERROR code to a message. */
+std::string DescribeAvError(const char* message, int code) {
+
+    char buf[AV_ERROR_MAX_STRING_SIZE];
+
+    if (av_strerror(code, buf, sizeof(buf)) < 0) {
+        return std::string(message);
+    }
+
+    buf[sizeof(buf) - 1] = '\0';
+
+    return std::string(message) + ": " + buf;
+}
+
+};
+
 AVFormatContext* MediaInfoWorker::sharedContext = nullptr;
 std::mutex MediaInfoWorker::sharedContextMutex;
 
@@ -27,19 +45,24 @@ void MediaInfoWorker::Execute() {
     avFormatContext = avformat_alloc_context();
 
     if (!avFormatContext) {
-        Napi::AsyncWorker::SetError("aformat context memory could not be allocated");
+        errorCode = AVERROR(ENOMEM);
+        Napi::AsyncWorker::SetError("avformat context memory could not be allocated");
         return;
     }
 
     int openStatus = avformat_open_input(&avFormatContext, fileName.c_str(), NULL, options);
 
     if (openStatus < 0) {
-        Napi::AsyncWorker::SetError("filePath could not be opened");
+        errorCode = openStatus;
+        Napi::AsyncWorker::SetError(DescribeAvError("filePath could not be opened", openStatus));
         return;
     }
 
-    if (avformat_find_stream_info(avFormatContext, NULL) < 0) {
-        Napi::AsyncWorker::SetError("could not get stream info");
+    const int infoStatus = avformat_find_stream_info(avFormatContext, NULL);
+
+    if (infoStatus < 0) {
+        errorCode = infoStatus;
+        Napi::AsyncWorker::SetError(DescribeAvError("could not get stream info", infoStatus));
         return;
     }
 }
@@ -63,7 +86,14 @@ void MediaInfoWorker::OnOK() {
 
 
 void MediaInfoWorker::OnError(const Napi::Error& error) {
-    deferred.Reject(error.Value());
+
+    Napi::Object value = error.Value();
+
+    if (errorCode != 0) {
+        value.Set("code", Napi::Number::New(Env(), errorCode));
+    }
+
+    deferred.Reject(value);
 }
 
 
