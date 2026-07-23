@@ -13,6 +13,14 @@ MediaInfoWorker::MediaInfoWorker(const Napi::Env& env, const std::string& fileNa
         options(std::move(options)),
         deferred(std::move(def)) {}
 
+MediaInfoWorker::~MediaInfoWorker() {
+    // Only reached while this worker still owns the context: ownership is
+    // released in OnOK() once the JS wrapper has taken it over.
+    if (avFormatContext != nullptr) {
+        avformat_close_input(&avFormatContext);
+    }
+}
+
 void MediaInfoWorker::Execute() {
 
     avFormatContext = avformat_alloc_context();
@@ -31,6 +39,7 @@ void MediaInfoWorker::Execute() {
 
     if (avformat_find_stream_info(avFormatContext, NULL) < 0) {
         Napi::AsyncWorker::SetError("could not get stream info");
+        return;
     }
 }
 
@@ -45,6 +54,9 @@ void MediaInfoWorker::OnOK() {
     Napi::Object result = AvFormatContext::constructor.New({});
 
     sharedContext = nullptr;
+
+    // The wrapper owns the context from here on; it closes it on destruction.
+    avFormatContext = nullptr;
 
     deferred.Resolve(result);
 }
