@@ -12,6 +12,12 @@
   "license": "MIT",
   "main": "index.js",
   "types": "index.d.ts",
+  "files": [
+    "src/",
+    "CMakeLists.txt",
+    "index.js",
+    "index.d.ts"
+  ],
   "scripts": {
     "install": "cmake-js compile",
     "test": "jest"
