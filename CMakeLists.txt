@@ -15,7 +15,9 @@ execute_process(COMMAND node -p "require('node-addon-api').include"
         )
 string(REGEX REPLACE "[\r\n\"]" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 
-file(GLOB SOURCE_FILES "src/*.cc") 
+# CONFIGURE_DEPENDS makes the build system re-run the glob, so adding a
+# source file no longer requires deleting the cache by hand.
+file(GLOB SOURCE_FILES CONFIGURE_DEPENDS "src/*.cc")
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
@@ -26,6 +28,9 @@ target_link_directories(${PROJECT_NAME} BEFORE PUBLIC ${FFMPEG_LIBRARY_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${FFMPEG_INCLUDE_DIRS} PRIVATE ${NODE_ADDON_API_DIR})
 target_compile_options(${PROJECT_NAME} PUBLIC ${FFMPEG_CFLAGS})
 
-
-add_definitions(-DNAPI_VERSION=3)
+# Scoped to the target and applied regardless of statement order, unlike the
+# directory-wide add_definitions() this replaces. Node-API 8 is available in
+# every Node.js release this addon supports (18 and newer) and is required for
+# the per-instance data used to keep the addon context aware.
+target_compile_definitions(${PROJECT_NAME} PRIVATE NAPI_VERSION=8)
 
