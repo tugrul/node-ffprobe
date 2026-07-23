@@ -20,7 +20,7 @@ jobs:
         # 7.x or newer, so the matrix covers both sides of the channel layout
         # API change handled in src/ffmpeg-compat.h.
         os: [ubuntu-latest, macos-latest]
-        node-version: [18.x, 20.x, 22.x, 23.x, 24.x]
+        node-version: [22.x, 23.x, 24.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
