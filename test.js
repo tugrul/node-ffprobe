@@ -389,6 +389,29 @@ describe('AvDuration class', () => {
 
     });
 
+    describe('negative time serial', () => {
+
+        const duration = new AvDuration(-9876543210);
+
+        test('valueOf method keeps the sign', () => {
+            expect(duration.valueOf()).toBe(-9876543210);
+        });
+
+        test('toString method prefixes the sign', () => {
+            expect(duration.toString()).toBe('-02:44:36.54');
+        });
+
+        test('field values hold the magnitude', () => {
+            expect(duration).toMatchObject({
+                hours: 2,
+                minutes: 44,
+                seconds: 36,
+                microseconds: 54
+            });
+        });
+
+    });
+
 });
 
 describe('AvStream classes', () => {
